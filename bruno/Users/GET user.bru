@@ -1,0 +1,15 @@
+meta {
+  name: Users: Get by id
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/users/7ca1f65e-3857-4167-99b5-bd835bb81133
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

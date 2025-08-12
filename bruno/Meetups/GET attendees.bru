@@ -1,0 +1,16 @@
+meta {
+  name: Meetups: List attendees
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/meetups/{{meetupId}}/attendees
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
+

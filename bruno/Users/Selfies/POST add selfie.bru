@@ -1,0 +1,18 @@
+meta {
+  name: Users: Add selfie
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{endpoint}}/users/{{userId}}/selfies
+  auth: inherit
+  Content-Type: application/json
+  body: json {
+    selfieUrl: "https://example.com/selfie.jpg"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

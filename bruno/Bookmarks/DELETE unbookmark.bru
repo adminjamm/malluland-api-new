@@ -1,0 +1,19 @@
+meta {
+  name: Bookmarks: Remove bookmark
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{endpoint}}/bookmarks/{{bookmarkedUserId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-user-id: {{userId}}
+}
+
+settings {
+  encodeUrl: true
+}

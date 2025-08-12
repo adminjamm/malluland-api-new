@@ -1,0 +1,23 @@
+meta {
+  name: Bookmarks: Add bookmark
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{endpoint}}/bookmarks
+  body: json
+  auth: inherit
+}
+
+body:json {
+  bookmarkedUserId: "00000000-0000-0000-0000-000000000002"
+}
+
+headers {
+  x-user-id: {{userId}}
+}
+
+settings {
+  encodeUrl: true
+}

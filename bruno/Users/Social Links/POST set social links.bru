@@ -1,0 +1,21 @@
+meta {
+  name: Users: Set social links
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{endpoint}}/users/{{userId}}/social-links
+  auth: inherit
+  Content-Type: application/json
+  body: json {
+    links: [
+      { platform: "instagram", handle: "demo_ig" },
+      { platform: "linkedin", handle: "demo_ln" }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+}

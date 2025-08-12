@@ -1,0 +1,37 @@
+meta {
+  name: Meetups: Create meetup
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{endpoint}}/meetups
+  body: json
+  auth: inherit
+}
+
+headers {
+  x-user-id: d7c351f8-18a4-4840-ac6f-2f27103cd048
+}
+
+body:json {
+  {
+    "name": "Coffee with Alice",
+    "activityId": 1,
+    "guests": 3,
+    "whoPays": "host",
+    "currencyCode": "INR",
+    "feeAmount": "0.00",
+    "locationText": "Kochi center",
+    "description": "Join for a coffee in Kochi city center.",
+    "startsAt": "2025-09-01T10:00:00.000Z",
+    "endsAt": "2025-09-01T12:00:00.000Z",
+    "city": "Kochi",
+    "state": "Kerala",
+    "country": "IN"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

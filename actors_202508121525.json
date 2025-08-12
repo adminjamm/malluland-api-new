@@ -1,0 +1,933 @@
+{
+"select * from actors": [
+	{
+		"id" : 1,
+		"name" : "Mohanlal",
+		"category" : "Actor",
+		"image_url" : "https:\/\/api.kraken.io\/images\/result.png",
+		"created_at" : "2025-07-25T06:01:47.127Z",
+		"updated_at" : "2025-07-25T06:01:47.127Z",
+		"original_url" : "https:\/\/malluland-assets.s3.amazonaws.com\/TFVDFLSUSbYNVKCFSMbDbQBRaMIQVC.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 2,
+		"name" : "Fahadh Faasil",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/POdYFdFKVQYPSLOQPPTENdXdcdCaET.png",
+		"created_at" : "2025-07-25T06:44:59.999Z",
+		"updated_at" : "2025-07-25T06:44:59.999Z",
+		"original_url" : "https:\/\/malluland-assets.s3.amazonaws.com\/POdYFdFKVQYPSLOQPPTENdXdcdCaET.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 4,
+		"name" : "Mohanlal",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/ITbHdATZONPJSQZJFSVGIMOAALWGDZ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.amazonaws.com\/ITbHdATZONPJSQZJFSVGIMOAALWGDZ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 5,
+		"name" : "Mammootty",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/BAXWaZWMdLcdXFIadHbSRHZOJGYIMV.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/BAXWaZWMdLcdXFIadHbSRHZOJGYIMV.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 6,
+		"name" : "Suresh Gopi",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/VTWNVJaIdVIWOSKZBYLLcJNAVWUTda.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/VTWNVJaIdVIWOSKZBYLLcJNAVWUTda.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 7,
+		"name" : "Jayaram",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/CabGMAGMENZACcPNDWDZIWOVABRaUb.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/CabGMAGMENZACcPNDWDZIWOVABRaUb.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 8,
+		"name" : "Dileep",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/GDdTOBKINQEbCQFaVDCXGLZSZHJFEO.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/GDdTOBKINQEbCQFaVDCXGLZSZHJFEO.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 9,
+		"name" : "Prithviraj Sukumaran",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/RIHRDOQcDaYCUaWJFFLBMATFAQZAJZ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/RIHRDOQcDaYCUaWJFFLBMATFAQZAJZ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 10,
+		"name" : "Dulquer Salmaan",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/XSGLMdMSWSdcQdTCJccNdEdNDOEKXW.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/XSGLMdMSWSdcQdTCJccNdEdNDOEKXW.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 11,
+		"name" : "Nivin Pauly",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/MUNXQSYcFIcEDcEUCOGDUXFCUAcJYY.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/MUNXQSYcFIcEDcEUCOGDUXFCUAcJYY.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 12,
+		"name" : "Tovino Thomas",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/PSIBTGbJTDWCRcYJHKUBTbRGFMPHTZ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/PSIBTGbJTDWCRcYJHKUBTbRGFMPHTZ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 13,
+		"name" : "Kunchacko Boban",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/SJGNDAEKOVVOCFVLUGNOSVPVVaaKAc.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/SJGNDAEKOVVOCFVLUGNOSVPVVaaKAc.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 14,
+		"name" : "Indrajith Sukumaran",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/EDJKTRMQBNOXCCAOAJSPNJVWEWYIXG.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/EDJKTRMQBNOXCCAOAJSPNJVWEWYIXG.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 15,
+		"name" : "Asif Ali",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/WAdUVXdcFLQbLXAKLZHLKTZGOYEHYA.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/WAdUVXdcFLQbLXAKLZHLKTZGOYEHYA.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 16,
+		"name" : "Vineeth Sreenivasan",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/KFcMEABbHZNHNDFGODFaOVXcWQBBWU.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/KFcMEABbHZNHNDFGODFaOVXcWQBBWU.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 17,
+		"name" : "Soubin Shahir",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/ALVHdXdWQdMEDUQETUCGZWAXZMGRXJ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/ALVHdXdWQdMEDUQETUCGZWAXZMGRXJ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 18,
+		"name" : "Suraj Venjaramoodu",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/MGSYLMBFSAWPMYadVaHIMUDdWLREbF.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/MGSYLMBFSAWPMYadVaHIMUDdWLREbF.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 19,
+		"name" : "Joju George",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/ZbRdYZbJEaTaCdKJIELXSdJSRXaDdE.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/ZbRdYZbJEaTaCdKJIELXSdJSRXaDdE.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 20,
+		"name" : "Biju Menon",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/TDbLFMZbKNKGWUGBBWKIVWJINKGWcJ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/TDbLFMZbKNKGWUGBBWKIVWJINKGWcJ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 21,
+		"name" : "Jayasurya",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/GHGUcVDIYKBFNcJUCMVKVNcXDcdNKc.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/GHGUcVDIYKBFNcJUCMVKVNcXDcdNKc.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 22,
+		"name" : "Neeraj Madhav",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/GVbUDDKQARSCbINCMTCFGaXOcbFBNP.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/GVbUDDKQARSCbINCMTCFGaXOcbFBNP.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 23,
+		"name" : "Arjun Ashokan",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/bILRbSOaZZAJVQVbXENVICKPQPVUOL.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/bILRbSOaZZAJVQVbXENVICKPQPVUOL.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 24,
+		"name" : "Aju Varghese",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/FYBUPRdHUDTBKGRTbJdcILbcYbFDEJ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/FYBUPRdHUDTBKGRTbJdcILbcYbFDEJ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 25,
+		"name" : "Harisree Ashokan",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/YXQbaSXBKBWJMbSAMDTHSCSAAZICAV.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/YXQbaSXBKBWJMbSAMDTHSCSAAZICAV.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 26,
+		"name" : "Jagathy Sreekumar",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/aIPIQdMYYJbFLdHHZGDDONXWJDYdSJ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/aIPIQdMYYJbFLdHHZGDDONXWJDYdSJ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 27,
+		"name" : "Innocent",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/LMMGBICJdJEIZcPDcXTXIYCKPIDIHJ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/LMMGBICJdJEIZcPDcXTXIYCKPIDIHJ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 28,
+		"name" : "Thilakan",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/QNCaBTCTIbPaLOAdIcVdNFXCDIXaKY.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/QNCaBTCTIbPaLOAdIcVdNFXCDIXaKY.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 29,
+		"name" : "Nedumudi Venu",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/OLXCKJBZWQEFbBGJQcXHVcRJRCCAHd.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/OLXCKJBZWQEFbBGJQcXHVcRJRCCAHd.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 30,
+		"name" : "Lal",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/cTFVWZSGGCRFCRcDbTKNDEGcKCLGNG.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/cTFVWZSGGCRFCRcDbTKNDEGcKCLGNG.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 31,
+		"name" : "Siddique",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/TKVSJKcPBaBOVCbYZDCXcZcaLScQXb.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/TKVSJKcPBaBOVCbYZDCXcZcaLScQXb.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 32,
+		"name" : "Mukesh",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/XVIQHCDPESNBBEATEbBMDQVNKXaGcD.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/XVIQHCDPESNBBEATEbBMDQVNKXaGcD.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 33,
+		"name" : "Salim Kumar",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/TZUTBGYSUJIBdVIdTZScAdBcTQECEG.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/TZUTBGYSUJIBdVIdTZScAdBcTQECEG.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 34,
+		"name" : "Vinay Forrt",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/UKZIFBIbWKTVEMRJZMMKICKBWbWHTR.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/UKZIFBIbWKTVEMRJZMMKICKBWbWHTR.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 35,
+		"name" : "Sreenath Bhasi",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/JDSMbdUABLQIFFHbIDYDUDIdbHDYTL.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/JDSMbdUABLQIFFHbIDYDUDIdbHDYTL.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 36,
+		"name" : "Chemban Vinod Jose",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/YSVHaWGdAPMEPLDZLYFLTdZJZOEPYG.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/YSVHaWGdAPMEPLDZLYFLTdZJZOEPYG.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 37,
+		"name" : "Basil Joseph",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/VHXMKOBMZHLVccIMBKVOcdJbJTScEZ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/VHXMKOBMZHLVccIMBKVOcdJbJTScEZ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 38,
+		"name" : "Mathew Thomas",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/ETZASPMGNIXYQHARYKGDFCVYAcHTJS.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/ETZASPMGNIXYQHARYKGDFCVYAcHTJS.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 39,
+		"name" : "Naslen K. Gafoor",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/bHFESTAVZFcFZbOVTBYRQQbLUFJSMT.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/bHFESTAVZFcFZbOVTBYRQQbLUFJSMT.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 40,
+		"name" : "Ganapathi S. Poduval",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/CaRVDLEYMJIXLQNFdIRcVUXWFRGAIG.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/CaRVDLEYMJIXLQNFdIRcVUXWFRGAIG.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 41,
+		"name" : "Lukman Avaran",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/HHSAccdQQOHAIEdLLMRSSUdWQXLYRG.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/HHSAccdQQOHAIEdLLMRSSUdWQXLYRG.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 42,
+		"name" : "Sharaf U Dheen",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/BRVDMacIUCFBFKdOFJVSRMCTAbIEEK.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/BRVDMacIUCFBFKdOFJVSRMCTAbIEEK.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 43,
+		"name" : "Balu Varghese",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/TLaPDMPSWHZVNFMcMGLdGVcWbRVZWM.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/TLaPDMPSWHZVNFMcMGLdGVcWbRVZWM.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 44,
+		"name" : "Antony Varghese (Pepe)",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/PISAPcGVOVVQZUcOXIIAIHLSOYUIUI.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/PISAPcGVOVVQZUcOXIIAIHLSOYUIUI.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 45,
+		"name" : "Sandeep Pradeep",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/DEUSGPERccVUBTUEKSZHIPKNcQJEEI.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/DEUSGPERccVUBTUEKSZHIPKNcQJEEI.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 46,
+		"name" : "Shine Tom Chacko",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/UPLDOMTUKQGZIdQVaWSEXDdVJNNTJP.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/UPLDOMTUKQGZIdQVaWSEXDdVJNNTJP.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 47,
+		"name" : "Unni Mukundan",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/aWTODaOAQJATUMQKMcFJRYbLXLUWEP.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/aWTODaOAQJATUMQKMcFJRYbLXLUWEP.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 48,
+		"name" : "Jagadeesh",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/MDFGUXZbGRUFZGNBHbGECTYJZMKYdU.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/MDFGUXZbGRUFZGNBHbGECTYJZMKYdU.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 49,
+		"name" : "Prakash Varma",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/OFZGYSaHGPFKTSOIdCKcAPOJJBCTKF.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/OFZGYSaHGPFKTSOIdCKcAPOJJBCTKF.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 50,
+		"name" : "Sunny Wayne",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/CbVFWBKcRAOKKRXRSHZYYcPAaKTKCN.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/CbVFWBKcRAOKKRXRSHZYYcPAaKTKCN.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 51,
+		"name" : "Manoj K Jayan",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/LUaaYPLSDHORBCWDaLRHVWAMHAMVGU.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/LUaaYPLSDHORBCWDaLRHVWAMHAMVGU.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 52,
+		"name" : "Sukumari",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/AEaEMdbcFJJGJRTIKGJZLHRDcMMSAN.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/AEaEMdbcFJJGJRTIKGJZLHRDcMMSAN.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 53,
+		"name" : "KPAC Lalitha",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/bUbdTDHPDDSMaaAIPQLZKCVdOAFHZd.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/bUbdTDHPDDSMaaAIPQLZKCVdOAFHZd.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 54,
+		"name" : "Manju Warrier",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/VRNIWVWIBQKGOFLJRQQGQAAWFLZSRQ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/VRNIWVWIBQKGOFLJRQQGQAAWFLZSRQ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 55,
+		"name" : "Shobana",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/CXcRCLHKPIXENRIcGOacKJLHAHFdaV.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/CXcRCLHKPIXENRIcGOacKJLHAHFdaV.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 56,
+		"name" : "Parvathy Thiruvothu",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/FDURSDFCLRJPaDYDOJdIYPQMTQaHdI.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/FDURSDFCLRJPaDYDOJdIYPQMTQaHdI.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 57,
+		"name" : "Revathi",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/SUHIBKTCbMQMcPHXIMLIYEUVMRPNFJ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/SUHIBKTCbMQMcPHXIMLIYEUVMRPNFJ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 58,
+		"name" : "Urvashi",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/LJWCcUUFIDKVEPZQTAKcBJMTJCTIKN.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/LJWCcUUFIDKVEPZQTAKcBJMTJCTIKN.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 59,
+		"name" : "Kavya Madhavan",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/TXLJbINRPCMFPZYUDPWVaAJSHIdEYE.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/TXLJbINRPCMFPZYUDPWVaAJSHIdEYE.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 60,
+		"name" : "Meera Jasmine",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/IEVbbLAYaKYaIWPWbFHdUCLWZMSPRO.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/IEVbbLAYaKYaIWPWbFHdUCLWZMSPRO.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 61,
+		"name" : "Samvrutha Sunil",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/GZbKKNNKCcXFIQCVZQUaLdNUdUMcWB.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/GZbKKNNKCcXFIQCVZQUaLdNUdUMcWB.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 62,
+		"name" : "Samyuktha Menon",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/aVdNMVTcZCDBXcXWBREODdAUGFZISP.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/aVdNMVTcZCDBXcXWBREODdAUGFZISP.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 63,
+		"name" : "Aishwarya Lekshmi",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/DREaJNMIVLZUdHDdPIOCIaOMQFIHRL.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/DREaJNMIVLZUdHDdPIOCIaOMQFIHRL.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 64,
+		"name" : "Rajisha Vijayan",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/CaFQbNETLVBbYTQPBCIVUJAOdVSFGb.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/CaFQbNETLVBbYTQPBCIVUJAOdVSFGb.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 65,
+		"name" : "Nimisha Sajayan",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/MBNWCSNAGKFETMFNXMSNZFJSIXIERD.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/MBNWCSNAGKFETMFNXMSNZFJSIXIERD.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 66,
+		"name" : "Anna Ben",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/cRTYETHBWCWTKaUSXQdaJDVcLVcDFR.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/cRTYETHBWCWTKaUSXQdaJDVcLVcDFR.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 67,
+		"name" : "Aparna Balamurali",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/ZDcRGFHLZLWKdRMBGNBPcKKYXNSDaF.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/ZDcRGFHLZLWKdRMBGNBPcKKYXNSDaF.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 68,
+		"name" : "Nithya Menen",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/GHNIBLAHWIXSDRFRKYGNaPbUOcHcRS.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/GHNIBLAHWIXSDRFRKYGNaPbUOcHcRS.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 69,
+		"name" : "Madonna Sebastian",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/YWacRLIVCDLQQCdSIXBIbDFYVUQXOY.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/YWacRLIVCDLQQCdSIXBIbDFYVUQXOY.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 70,
+		"name" : "Nazriya Nazim",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/TILcKMXLOaMTDSYNAYPGQaaATTZUCd.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/TILcKMXLOaMTDSYNAYPGQaaATTZUCd.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 71,
+		"name" : "Amala Paul",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/BERNcHXJOLZXDUIIPRcITabWAGIbPL.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/BERNcHXJOLZXDUIIPRcITabWAGIbPL.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 72,
+		"name" : "Bhavana",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/BFBYGUAGBOBAVaHPWRCNcFLYMPdXHK.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/BFBYGUAGBOBAVaHPWRCNcFLYMPdXHK.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 73,
+		"name" : "Anupama Parameswaran",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/KdAUZcAcEbIDdOFFPMUaFAdTERSXFE.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/KdAUZcAcEbIDdOFFPMUaFAdTERSXFE.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 74,
+		"name" : "Priya Prakash Varrier",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/cbAEYQTPCLSQTVTcWKQWPDQWZIZJAZ.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/cbAEYQTPCLSQTVTcWKQWPDQWZIZJAZ.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 75,
+		"name" : "Sai Pallavi",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/QJVFTObdVKJLSSJXacLEJJPTIXZTFC.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/QJVFTObdVKJLSSJXacLEJJPTIXZTFC.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 76,
+		"name" : "Rima Kallingal",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/bbGCMWCACWXWHOdHTVSdNPPKaXLYWH.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/bbGCMWCACWXWHOdHTVSdNPPKaXLYWH.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 77,
+		"name" : "Shruti Ramachandran",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/WLYUEXHERNWOJaLcITMGKABNbFRPdT.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/WLYUEXHERNWOJaLcITMGKABNbFRPdT.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 78,
+		"name" : "Malavika Mohanan",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/EaQRbDQGYMBIcOaAJAdTRMDAIMRIMS.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/EaQRbDQGYMBIcOaAJAdTRMDAIMRIMS.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 79,
+		"name" : "Srinda",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/BDYdDVQRPNULFXNDARUGcaRORKVCDW.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/BDYdDVQRPNULFXNDARUGcaRORKVCDW.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 80,
+		"name" : "Mamta Mohandas",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/cWMJWKaICLRFcPHKXdVFIAONQESAUU.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/cWMJWKaICLRFcPHKXdVFIAONQESAUU.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 81,
+		"name" : "Manju Pillai",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/YZAXEFCBCFRHUJZNFQLKNEYIIPNNJH.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/YZAXEFCBCFRHUJZNFQLKNEYIIPNNJH.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 82,
+		"name" : "Mamitha Baiju",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/bLUCYMGUVCQULUDFAIRCMYXOLJBYaO.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/bLUCYMGUVCQULUDFAIRCMYXOLJBYaO.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 83,
+		"name" : "Anaswara Rajan",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/UHVFETNGIMUPTNUXQLRQOaXSVFWUQV.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/UHVFETNGIMUPTNUXQLRQOaXSVFWUQV.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 84,
+		"name" : "Ahaana Krishna",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/OJQFVEKVDWJNKdVIQSVTXRHbSBcOTG.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/OJQFVEKVDWJNKdVIQSVTXRHbSBcOTG.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 85,
+		"name" : "Esther Anil",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/CKODEDUPNAMLPOdXWHLaRSQNIQXZPX.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/CKODEDUPNAMLPOdXWHLaRSQNIQXZPX.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 86,
+		"name" : "Gouri Kishan",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/LVJMRPQcRWJUQVdHbCcXICbZSBbZGG.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/LVJMRPQcRWJUQVdHbCcXICbZSBbZGG.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 87,
+		"name" : "Kalyani Priyadarshan",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/GHCIYTQLCZWHYSTdMJCVOTUcRMbTPP.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/GHCIYTQLCZWHYSTdMJCVOTUcRMbTPP.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 88,
+		"name" : "Darshana Rajendran",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/APNAOcXIZHWCMbWJLSSLPWNFXXLQCV.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/APNAOcXIZHWCMbWJLSSLPWNFXXLQCV.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 89,
+		"name" : "Navya Nair",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/MRLUGKIUbEQAGPSPRLJURbaQFGCVCB.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/MRLUGKIUbEQAGPSPRLJURbaQFGCVCB.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 90,
+		"name" : "Kani Kusruti",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/EWdHaNbbCOIJGBGBXMPAKdWbdYJLPW.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/EWdHaNbbCOIJGBGBXMPAKdWbdYJLPW.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 91,
+		"name" : "Aparna Das",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/IWFQTLYHSBPOZDWHWLMDdAWZEFOWKD.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/IWFQTLYHSBPOZDWHWLMDdAWZEFOWKD.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 92,
+		"name" : "Namitha Pramod",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/OAPRGRCSMZNKAEHXCRGDUAVBcdNRAW.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/OAPRGRCSMZNKAEHXCRGDUAVBcdNRAW.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 93,
+		"name" : "Nayanthara",
+		"category" : "Actress",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/CZUaPMWSSKLZRFTKSNJaHXRXQbYILc.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.ap-south-1.amazonaws.com\/CZUaPMWSSKLZRFTKSNJaHXRXQbYILc.png",
+		"use_original_url" : false
+	},
+	{
+		"id" : 94,
+		"name" : "Fahadh Faasil",
+		"category" : "Actor",
+		"image_url" : "https:\/\/malluland-optimised-images.s3.ap-south-1.amazonaws.com\/POdYFdFKVQYPSLOQPPTENdXdcdCaET.png",
+		"created_at" : "2025-07-25T07:06:19.431Z",
+		"updated_at" : "2025-07-25T07:06:19.431Z",
+		"original_url" : "https:\/\/malluland-assets.s3.amazonaws.com\/POdYFdFKVQYPSLOQPPTENdXdcdCaET.png",
+		"use_original_url" : false
+	}
+]}

@@ -11,7 +11,20 @@
     "drizzle:migrate": "drizzle-kit migrate",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "seed": "tsx src/scripts/seed.ts"
+    "seed": "tsx src/scripts/seed.ts",
+    "seed:all": "tsx src/scripts/seeds/seed-all.ts",
+    "seed:users": "tsx src/scripts/seeds/users.ts",
+    "seed:user-states": "tsx src/scripts/seeds/userStates.ts",
+    "seed:catalog-activities": "tsx src/scripts/seeds/catalogActivities.ts",
+    "seed:catalog-traits": "tsx src/scripts/seeds/catalogTraits.ts",
+    "seed:catalog-actors": "tsx src/scripts/seeds/catalogActors.ts",
+    "seed:catalog-actresses": "tsx src/scripts/seeds/catalogActresses.ts",
+    "seed:currencies": "tsx src/scripts/seeds/currencies.ts",
+    "seed:block-and-report": "tsx src/scripts/seeds/blockAndReport.ts",
+    "seed:app-settings": "tsx src/scripts/seeds/appSettings.ts",
+    "db:reset-and-seed": "tsx src/scripts/reset-and-seed.ts",
+    "db:truncate-all": "tsx src/scripts/truncate-all.ts",
+    "seed:bookmarks": "tsx src/scripts/seeds/bookmarks.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.3",
@@ -22,6 +35,7 @@
     "drizzle-zod": "^0.7.0",
     "hono": "^4.5.7",
     "pg": "^8.16.3",
+    "reflect-metadata": "^0.1.13",
     "typedi": "^0.10.0",
     "uuid": "^9.0.1",
     "zod": "^3.23.8"

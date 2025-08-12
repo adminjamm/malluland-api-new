@@ -1,0 +1,19 @@
+meta {
+  name: Requests: Chat accept
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{endpoint}}/requests/chats/{{requestId}}/accept
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-user-id: {{userId}}
+}
+
+settings {
+  encodeUrl: true
+}

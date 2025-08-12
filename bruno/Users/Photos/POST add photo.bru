@@ -1,0 +1,20 @@
+meta {
+  name: Users: Add photo
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{endpoint}}/users/{{userId}}/photos
+  auth: inherit
+  Content-Type: application/json
+  body: json {
+    originalUrl: "https://example.com/photo.jpg"
+    imageType: "avatar"
+    position: 1
+  }
+}
+
+settings {
+  encodeUrl: true
+}

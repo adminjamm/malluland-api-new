@@ -1,0 +1,15 @@
+meta {
+  name: Users: List selfies
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/users/{{userId}}/selfies
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

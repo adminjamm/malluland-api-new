@@ -1,0 +1,558 @@
+openapi: 3.0.3
+info:
+  title: Malluland API
+  version: "1.0.0"
+  description: Official API for Malluland backend services.
+servers:
+  - url: http://localhost:8787
+    description: Local server
+components:
+  securitySchemes:
+    XUserId:
+      type: apiKey
+      in: header
+      name: x-user-id
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number
+  responses:
+    UnauthorizedHeader:
+      description: Missing x-user-id header
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+  /people:
+    get:
+      summary: Discover people near you (balanced by gender)
+      security:
+        - XUserId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: lat
+          in: query
+          schema:
+            type: number
+          required: false
+        - name: lng
+          in: query
+          schema:
+            type: number
+          required: false
+      responses:
+        '200':
+          description: People list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  pageSize:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        avatar: { type: string, nullable: true }
+                        name: { type: string, nullable: true }
+                        age: { type: integer, nullable: true }
+                        bioSnippet: { type: string, nullable: true }
+        '400':
+          $ref: '#/components/responses/UnauthorizedHeader'
+  /meetups:
+    get:
+      summary: List/discover meetups
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum: [upcoming, this-week, this-weekend]
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: activityId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Meetups list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page: { type: integer }
+                  pageSize: { type: integer }
+                  items:
+                    type: array
+                    items:
+                      type: object
+    post:
+      summary: Create a meetup
+      security:
+        - XUserId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, activityId, guests, whoPays, currencyCode, feeAmount, locationText, description, startsAt, endsAt, city, state, country]
+              properties:
+                name: { type: string }
+                activityId: { type: integer }
+                guests: { type: integer }
+                whoPays: { type: string }
+                currencyCode: { type: string }
+                feeAmount: { type: string }
+                locationText: { type: string }
+                description: { type: string }
+                startsAt: { type: string, format: date-time }
+                endsAt: { type: string, format: date-time }
+                mapUrl: { type: string, nullable: true }
+                city: { type: string }
+                state: { type: string }
+                country: { type: string }
+                lat: { type: number, nullable: true }
+                lng: { type: number, nullable: true }
+      responses:
+        '201':
+          description: Created meetup
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/UnauthorizedHeader'
+  /meetups/me:
+    get:
+      summary: List meetups hosted by the acting user
+      security:
+        - XUserId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: includePast
+          in: query
+          schema: { type: string, enum: [true, false] }
+      responses:
+        '200':
+          description: My meetups list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page: { type: integer }
+                  pageSize: { type: integer }
+                  items: { type: array, items: { type: object } }
+  /meetups/{id}:
+    patch:
+      summary: Update a meetup
+      security:
+        - XUserId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { description: Updated }
+        '400': { $ref: '#/components/responses/UnauthorizedHeader' }
+    delete:
+      summary: Delete a meetup
+      security:
+        - XUserId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+  /meetups/{id}/attendees:
+    get:
+      summary: List meetup attendees
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Attendees, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /meetups/{id}/requests:
+    post:
+      summary: Send request to join meetup
+      security:
+        - XUserId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message: { type: string, maxLength: 500 }
+      responses:
+        '201': { description: Created }
+        '400': { $ref: '#/components/responses/UnauthorizedHeader' }
+  /meetups/me/requests/sent:
+    get:
+      summary: Sent meetup requests
+      security:
+        - XUserId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200': { description: Sent list, content: { application/json: { schema: { type: object } } } }
+  /meetups/me/requests/received:
+    get:
+      summary: Received meetup requests
+      security:
+        - XUserId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200': { description: Received list, content: { application/json: { schema: { type: object } } } }
+  /meetups/requests/{id}/approve:
+    post:
+      summary: Approve meetup request
+      security:
+        - XUserId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Approved }
+  /meetups/requests/{id}/decline:
+    post:
+      summary: Decline meetup request
+      security:
+        - XUserId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Declined }
+  /bookmarks:
+    get:
+      summary: List bookmarks
+      security:
+        - XUserId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200':
+          description: Bookmarks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page: { type: integer }
+                  pageSize: { type: integer }
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        user: { type: object }
+    post:
+      summary: Add bookmark
+      security:
+        - XUserId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookmarkedUserId]
+              properties:
+                bookmarkedUserId: { type: string, format: uuid }
+      responses:
+        '201': { description: Created }
+        '400': { $ref: '#/components/responses/UnauthorizedHeader' }
+  /bookmarks/{bookmarkedUserId}:
+    delete:
+      summary: Remove bookmark
+      security:
+        - XUserId: []
+      parameters:
+        - name: bookmarkedUserId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Removed, content: { application/json: { schema: { type: object, properties: { ok: { type: boolean } } } } } }
+  /requests:
+    get:
+      summary: List requests
+      security:
+        - XUserId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: filter
+          in: query
+          required: false
+          schema: { type: string, enum: [all, meetups, chats], default: all }
+      responses:
+        '200': { description: Requests, content: { application/json: { schema: { type: object } } } }
+  /requests/chats/{id}/accept:
+    post:
+      summary: Accept chat request
+      security:
+        - XUserId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Updated }
+  /requests/chats/{id}/decline:
+    post:
+      summary: Decline chat request
+      security:
+        - XUserId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Updated }
+  /requests/chats/{id}/archive:
+    post:
+      summary: Archive chat request
+      security:
+        - XUserId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Updated }
+  /users/{id}:
+    get:
+      summary: Get user by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: User }
+        '404': { description: Not found }
+    put:
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': { description: Updated user }
+  /users/{id}/photos:
+    post:
+      summary: Add photo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [originalUrl, imageType, position]
+              properties:
+                originalUrl: { type: string, format: uri }
+                optimizedUrl: { type: string, format: uri, nullable: true }
+                imageType: { type: string }
+                position: { type: integer }
+      responses:
+        '201': { description: Created }
+    get:
+      summary: List photos
+      responses:
+        '200': { description: Photos, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /users/{id}/selfies:
+    post:
+      summary: Add selfie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [selfieUrl]
+              properties:
+                selfieUrl: { type: string, format: uri }
+      responses:
+        '201': { description: Created }
+    get:
+      summary: List selfies
+      responses:
+        '200': { description: Selfies, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /users/{id}/interests:
+    post:
+      summary: Replace interests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [interestIds]
+              properties:
+                interestIds: { type: array, items: { type: integer } }
+      responses:
+        '201': { description: Updated }
+    get:
+      summary: List interests
+      responses:
+        '200': { description: Interests, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /users/{id}/traits:
+    post:
+      summary: Replace traits
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [traitIds]
+              properties:
+                traitIds: { type: array, items: { type: integer } }
+      responses:
+        '201': { description: Updated }
+    get:
+      summary: List traits
+      responses:
+        '200': { description: Traits, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /users/{id}/favorite-actors:
+    post:
+      summary: Replace favorite actors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [actorIds]
+              properties:
+                actorIds: { type: array, items: { type: integer } }
+      responses:
+        '201': { description: Updated }
+    get:
+      summary: List favorite actors
+      responses:
+        '200': { description: Favorites, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /users/{id}/favorite-actresses:
+    post:
+      summary: Replace favorite actresses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [actressIds]
+              properties:
+                actressIds: { type: array, items: { type: integer } }
+      responses:
+        '201': { description: Updated }
+    get:
+      summary: List favorite actresses
+      responses:
+        '200': { description: Favorites, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /users/{id}/social-links:
+    post:
+      summary: Replace social links
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [links]
+              properties:
+                links:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      platform: { type: string }
+                      handle: { type: string }
+      responses:
+        '201': { description: Updated }
+    get:
+      summary: List social links
+      responses:
+        '200': { description: Social links, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /actors:
+    get:
+      summary: List actors
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200': { description: Actors, content: { application/json: { schema: { type: object } } } }
