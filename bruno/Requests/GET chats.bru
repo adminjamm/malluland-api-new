@@ -1,0 +1,19 @@
+meta {
+  name: Requests: List chats
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/requests?filter=chats&page=1
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-user-id: {{userId}}
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,36 +1,73 @@
-import { Service, Inject } from 'typedi';
+import { Service, Container } from 'typedi';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { userBookmarks, allUsers } from '../db/schema';
-import { and, eq, desc, inArray } from 'drizzle-orm';
+import { bookmarks, users as usersTable } from '../db/schema';
+import { and, eq, desc, inArray, sql } from 'drizzle-orm';
 
 export type Db = NodePgDatabase;
 
 @Service()
 export class BookmarksRepository {
-  constructor(@Inject('db') private readonly db: Db) {}
+  private get db(): Db {
+    return Container.get('db');
+  }
 
-  async listActive(userId: string, { limit, offset }: { limit: number; offset: number }) {
+  async list(userId: string, { limit, offset }: { limit: number; offset: number }) {
     const rows = await this.db
       .select({
-        bookmarkId: userBookmarks.id,
-        bookmarkedUserId: userBookmarks.bookmarkedUserId,
+        id: bookmarks.id,
+        bookmarkedUserId: bookmarks.bookmarkedUserId,
+        createdAt: bookmarks.createdAt,
       })
-      .from(userBookmarks)
-      .where(and(eq(userBookmarks.userId, userId), eq(userBookmarks.isActive, true)))
-      .orderBy(desc(userBookmarks.createdAt))
+      .from(bookmarks)
+      .where(eq(bookmarks.userId, userId))
+      .orderBy(desc(bookmarks.createdAt))
       .limit(limit)
       .offset(offset);
 
-    if (rows.length === 0) return [];
+    if (rows.length === 0) return [] as Array<{ id: string; user: any }>; 
 
     const ids = rows.map((r) => r.bookmarkedUserId);
     const users = await this.db
-      .select()
-      .from(allUsers)
-      .where(inArray(allUsers.id, ids));
+      .select({
+        id: usersTable.id,
+        name: usersTable.name,
+        city: usersTable.city,
+        state: usersTable.state,
+        country: usersTable.country,
+        gender: usersTable.gender,
+        dob: usersTable.dob,
+        bio: usersTable.bio,
+      })
+      .from(usersTable)
+      .where(inArray(usersTable.id, ids));
 
     const map = new Map(users.map((u: any) => [u.id, u]));
-    return rows.map((r) => ({ id: r.bookmarkId, user: map.get(r.bookmarkedUserId) }));
+    return rows.map((r) => ({ id: r.id, user: map.get(r.bookmarkedUserId) }));
+  }
+
+  async countForUser(userId: string) {
+    const res = await this.db.select({ count: sql`count(*)`.as('count') }).from(bookmarks).where(eq(bookmarks.userId, userId));
+    const c = (res as any)[0]?.count ?? 0;
+    return typeof c === 'number' ? c : Number(c);
+  }
+
+  async exists(userId: string, bookmarkedUserId: string) {
+    const rows = await this.db
+      .select({ id: bookmarks.id })
+      .from(bookmarks)
+      .where(and(eq(bookmarks.userId, userId), eq(bookmarks.bookmarkedUserId, bookmarkedUserId)))
+      .limit(1);
+    return rows.length > 0;
+  }
+
+  async add(userId: string, bookmarkedUserId: string) {
+    const row = { id: crypto.randomUUID(), userId, bookmarkedUserId, createdAt: new Date(), updatedAt: new Date() } as any;
+    return this.db.insert(bookmarks).values(row).returning();
+  }
+
+  async remove(userId: string, bookmarkedUserId: string) {
+    // Hard delete bookmark for the pair
+    return this.db.delete(bookmarks).where(and(eq(bookmarks.userId, userId), eq(bookmarks.bookmarkedUserId, bookmarkedUserId))).returning();
   }
 }
 

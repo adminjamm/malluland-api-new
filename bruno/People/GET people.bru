@@ -1,0 +1,19 @@
+meta {
+  name: People: Discover
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/people?page=1
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-user-id: aeaf574f-eb87-4609-80c0-12ac2b8db281
+}
+
+settings {
+  encodeUrl: true
+}

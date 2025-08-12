@@ -1,0 +1,19 @@
+meta {
+  name: Bookmarks: List
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/bookmarks?page=1
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-user-id: a9a60135-8333-4d6e-8ed7-78b55ee278ee
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Actresses: List
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/actresses?page=1
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

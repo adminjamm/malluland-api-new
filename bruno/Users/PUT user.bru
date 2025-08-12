@@ -1,0 +1,24 @@
+meta {
+  name: Users: Update profile
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{endpoint}}/users/{{userId}}
+  auth: inherit
+  Content-Type: application/json
+  body: json {
+    name: "Demo User"
+    city: "Kochi"
+    state: "Kerala"
+    country: "IN"
+    company: "Acme"
+    position: "Engineer"
+    bio: "Hello Bruno!"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

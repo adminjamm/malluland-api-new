@@ -1,0 +1,18 @@
+meta {
+  name: Users: Set favorite actresses
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{endpoint}}/users/{{userId}}/favorite-actresses
+  auth: inherit
+  Content-Type: application/json
+  body: json {
+    actressIds: [1, 2, 3]
+  }
+}
+
+settings {
+  encodeUrl: true
+}

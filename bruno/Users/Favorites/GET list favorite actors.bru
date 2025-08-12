@@ -1,0 +1,15 @@
+meta {
+  name: Users: List favorite actors
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/users/{{userId}}/favorite-actors
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Requests: List meetups
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/requests?filter=meetups&page=1
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-user-id: {{userId}}
+}
+
+settings {
+  encodeUrl: true
+}

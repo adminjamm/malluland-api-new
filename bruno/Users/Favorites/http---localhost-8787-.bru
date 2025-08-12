@@ -1,0 +1,15 @@
+meta {
+  name: Root: Ping base URL
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

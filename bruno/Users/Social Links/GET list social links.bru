@@ -1,0 +1,15 @@
+meta {
+  name: Users: List social links
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/users/{{userId}}/social-links
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

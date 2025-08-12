@@ -1,0 +1,20 @@
+meta {
+  name: Meetups: Discover upcoming
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/meetups?filter=this-week&page=1
+  body: none
+  auth: inherit
+}
+
+params:query {
+  filter: this-week
+  page: 1
+}
+
+settings {
+  encodeUrl: true
+}

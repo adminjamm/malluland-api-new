@@ -1,0 +1,20 @@
+meta {
+  name: Meetups: My meetups (host)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/meetups/me?page=1
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-user-id: {{userId}}
+}
+
+settings {
+  encodeUrl: true
+}
+

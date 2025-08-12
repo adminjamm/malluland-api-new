@@ -13,9 +13,9 @@ export const users = pgTable('users', {
   country: text('country'),
   userState: text('user_state'), // applicant | approved_free | approved_paid | disapproved | deactivated | banned | shadow_banned
   refid: text('refid'), // 6-char
-  company: text('company'), // <= 50
-  position: text('position'), // <= 50
-  bio: text('bio'), // <= 150
+  company: text('company'), // c= 50
+  position: text('position'), // c= 50
+  bio: text('bio'), // c= 150
   createdAt: timestamp('created_at'),
   updatedAt: timestamp('updated_at'),
 });
@@ -87,8 +87,9 @@ export const airports = pgTable('airports', {
   updatedAt: timestamp('updated_at'),
 });
 
-// Reuse existing user_images as user_photos (as per note)
-export const userImages = pgTable('user_images', {
+// user_photos (as per Malluland-Database-Schema.md: "use existing schema")
+// We expose the table name as user_photos while keeping the same column structure previously used.
+export const userPhotos = pgTable('user_photos', {
   id: uuid('id').primaryKey(),
   userId: uuid('user_id').notNull(),
   originalUrl: text('original_url').notNull(),
@@ -105,7 +106,6 @@ export const userImages = pgTable('user_images', {
   createdAt: timestamp('created_at'),
   updatedAt: timestamp('updated_at'),
 });
-export const userPhotos = userImages;
 
 export const socialLinks = pgTable('social_links', {
   id: uuid('id').primaryKey(),
@@ -135,6 +135,8 @@ export const catalogActors = pgTable('catalog_actors', {
   name: text('name'),
   isActive: boolean('is_active'),
   slug: text('slug'),
+  imageUrl: text('image_url'),
+  originalUrl: text('original_url'),
 });
 
 export const catalogActresses = pgTable('catalog_actresses', {
@@ -142,6 +144,8 @@ export const catalogActresses = pgTable('catalog_actresses', {
   name: text('name'),
   isActive: boolean('is_active'),
   slug: text('slug'),
+  imageUrl: text('image_url'),
+  originalUrl: text('original_url'),
 });
 
 export const currencies = pgTable('currencies', {
@@ -188,6 +192,15 @@ export const bookmarks = pgTable('bookmarks', {
   id: uuid('id').primaryKey(),
   userId: uuid('user_id'),
   bookmarkedUserId: uuid('bookmarked_user_id'),
+  createdAt: timestamp('created_at'),
+  updatedAt: timestamp('updated_at'),
+});
+
+// Per Malluland-Database-Schema.md: user_bookmarks with id, user_id, bookmarked_user_id, created_at, updated_at
+export const userBookmarks = pgTable('user_bookmarks', {
+  id: uuid('id').primaryKey(),
+  userId: uuid('user_id').notNull(),
+  bookmarkedUserId: uuid('bookmarked_user_id').notNull(),
   createdAt: timestamp('created_at'),
   updatedAt: timestamp('updated_at'),
 });

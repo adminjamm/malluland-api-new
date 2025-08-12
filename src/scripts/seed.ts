@@ -12,6 +12,7 @@ import {
   users,
 } from '../db/schema';
 import { randomUUID } from 'node:crypto';
+import { eq } from 'drizzle-orm';
 
 function sixCharRefId() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -28,17 +29,21 @@ async function main() {
   // Seed user_states
   const userStatesData = [
     'pending',
-    'approved',
-    'approved',
+    'approved_free',
+    'approved_paid',
     'disapproved',
     'deactivated',
     'banned',
     'shadow_banned',
   ].map((name) => ({ id: randomUUID(), name }));
-  await db
-    .insert(userStates)
-    .values(userStatesData)
-    .onConflictDoNothing();
+  const existingUserStates = await db.select({ name: userStates.name }).from(userStates);
+  const existingUserStateNames = new Set(existingUserStates.map(s => s.name));
+  const newUserStates = userStatesData.filter(s => !existingUserStateNames.has(s.name));
+  if (newUserStates.length) {
+    await db
+      .insert(userStates)
+      .values(newUserStates);
+  }
 
   // Seed catalog_activities (examples)
   const activities = [
@@ -48,7 +53,13 @@ async function main() {
     { id: 4, name: 'Road Trip', slug: 'road-trip', isActive: true },
     { id: 5, name: 'Board Games', slug: 'board-games', isActive: true },
   ];
-  await db.insert(catalogActivities).values(activities).onConflictDoNothing();
+  // insert only those that don't exist (by id)
+  const existingActivities = await db.select({ id: catalogActivities.id }).from(catalogActivities);
+  const existingActivityIds = new Set(existingActivities.map(a => a.id));
+  const newActivities = activities.filter(a => !existingActivityIds.has(a.id));
+  if (newActivities.length) {
+    await db.insert(catalogActivities).values(newActivities);
+  }
 
   // Seed catalog_traits (examples)
   const traits = [
@@ -58,21 +69,36 @@ async function main() {
     { id: 4, name: 'Ambitious', slug: 'ambitious', isActive: true },
     { id: 5, name: 'Empathetic', slug: 'empathetic', isActive: true },
   ];
-  await db.insert(catalogTraits).values(traits).onConflictDoNothing();
+  const existingTraits = await db.select({ id: catalogTraits.id }).from(catalogTraits);
+  const existingTraitIds = new Set(existingTraits.map(t => t.id));
+  const newTraits = traits.filter(t => !existingTraitIds.has(t.id));
+  if (newTraits.length) {
+    await db.insert(catalogTraits).values(newTraits);
+  }
 
   // Seed catalog_actors (minimal examples)
   const actors = [
     { id: 1, name: 'Mohanlal', slug: 'mohanlal', isActive: true },
     { id: 2, name: 'Mammootty', slug: 'mammootty', isActive: true },
   ];
-  await db.insert(catalogActors).values(actors).onConflictDoNothing();
+  const existingActors = await db.select({ id: catalogActors.id }).from(catalogActors);
+  const existingActorIds = new Set(existingActors.map(a => a.id));
+  const newActors = actors.filter(a => !existingActorIds.has(a.id));
+  if (newActors.length) {
+    await db.insert(catalogActors).values(newActors);
+  }
 
   // Seed catalog_actresses (minimal examples)
   const actresses = [
     { id: 1, name: 'Manju Warrier', slug: 'manju-warrier', isActive: true },
     { id: 2, name: 'Parvathy Thiruvothu', slug: 'parvathy-thiruvothu', isActive: true },
   ];
-  await db.insert(catalogActresses).values(actresses).onConflictDoNothing();
+  const existingActresses = await db.select({ id: catalogActresses.id }).from(catalogActresses);
+  const existingActressIds = new Set(existingActresses.map(a => a.id));
+  const newActresses = actresses.filter(a => !existingActressIds.has(a.id));
+  if (newActresses.length) {
+    await db.insert(catalogActresses).values(newActresses);
+  }
 
   // Seed currencies (subset)
   const currencyData = [
@@ -80,7 +106,12 @@ async function main() {
     { code: 'USD', symbol: '$', name: 'US Dollar', priorityOrder: 2 },
     { code: 'EUR', symbol: '€', name: 'Euro', priorityOrder: 3 },
   ];
-  await db.insert(currencies).values(currencyData).onConflictDoNothing();
+  const existingCurrencies = await db.select({ code: currencies.code }).from(currencies);
+  const existingCurrencyCodes = new Set(existingCurrencies.map(c => c.code));
+  const newCurrencies = currencyData.filter(c => !existingCurrencyCodes.has(c.code));
+  if (newCurrencies.length) {
+    await db.insert(currencies).values(newCurrencies);
+  }
 
   // Seed block_and_report options
   const reportOptions = [
@@ -90,13 +121,20 @@ async function main() {
     { id: randomUUID(), optionText: 'Fake Profile', displayOrder: 4, isActive: true },
     { id: randomUUID(), optionText: 'Other', displayOrder: 5, isActive: true },
   ];
-  await db.insert(blockAndReport).values(reportOptions).onConflictDoNothing();
+  const existingOptions = await db.select({ optionText: blockAndReport.optionText }).from(blockAndReport);
+  const existingOptionTexts = new Set(existingOptions.map(o => o.optionText));
+  const newOptions = reportOptions.filter(o => !existingOptionTexts.has(o.optionText));
+  if (newOptions.length) {
+    await db.insert(blockAndReport).values(newOptions);
+  }
 
   // Seed app_settings baseline
-  await db
-    .insert(appSettings)
-    .values({ id: randomUUID(), key: 'badge_cap', value: '25' })
-    .onConflictDoNothing();
+  const badgeCap = await db.select().from(appSettings).where(eq(appSettings.key, 'badge_cap')).limit(1) as any;
+  if (!badgeCap.length) {
+    await db
+      .insert(appSettings)
+      .values({ id: randomUUID(), key: 'badge_cap', value: '25' });
+  }
 
   // Seed users (minimal examples)
   const demoUsers = [
@@ -149,7 +187,12 @@ async function main() {
       updatedAt: new Date(),
     },
   ];
-  await db.insert(users).values(demoUsers).onConflictDoNothing();
+  const existingUsers = await db.select({ email: users.email }).from(users);
+  const existingEmails = new Set(existingUsers.map(u => u.email));
+  const newUsers = demoUsers.filter(u => !existingEmails.has(u.email));
+  if (newUsers.length) {
+    await db.insert(users).values(newUsers);
+  }
 
   console.log('Seed completed');
 }
