@@ -1,6 +1,6 @@
-import { Service, Inject } from 'typedi';
+import { Service, Container } from 'typedi';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { users, userImages, userSelfie, userInterests, userTraits, userFavoriteActors, userFavoriteActresses, socialLinks } from '../db/schema';
+import { users, userPhotos, userSelfie, userInterests, userTraits, userFavoriteActors, userFavoriteActresses, socialLinks } from '../db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 
@@ -8,7 +8,9 @@ export type Db = NodePgDatabase;
 
 @Service()
 export class UsersRepository {
-  constructor(@Inject('db') private readonly db: Db) {}
+  private get db(): Db {
+    return Container.get('db');
+  }
 
   // Users
   getById(id: string) {
@@ -24,11 +26,11 @@ export class UsersRepository {
   // Photos
   async addPhoto(userId: string, photo: { originalUrl: string; imageType: string; position: number; optimizedUrl?: string | null }) {
     const row = { id: randomUUID(), userId, originalUrl: photo.originalUrl, optimizedUrl: photo.optimizedUrl ?? null, imageType: photo.imageType, position: photo.position };
-    await this.db.insert(userImages).values(row);
+    await this.db.insert(userPhotos).values(row);
     return row;
   }
   listPhotos(userId: string) {
-    return this.db.select().from(userImages).where(eq(userImages.userId, userId)).orderBy(userImages.position);
+    return this.db.select().from(userPhotos).where(eq(userPhotos.userId, userId)).orderBy(userPhotos.position);
   }
 
   // Selfies
