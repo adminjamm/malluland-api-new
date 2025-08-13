@@ -118,6 +118,16 @@ Requests
   - Headers: x-user-id
   - Response: 200 <updated chat_request row>
 
+Storage
+- POST /storage/presign/put
+  - Body (json, all fields optional): { key?: string, contentType?: string (default: image/jpeg), expiresInSeconds?: number (default: 900), acl?: 'private'|'public-read' (default: 'private') }
+  - Behavior: If key is omitted/blank, a random key is generated using <timestamp>-<random>.<ext?> inferred from contentType.
+  - Response: 200 { url, bucket, key }
+
+- POST /storage/presign/get
+  - Body (json): { key: string, expiresInSeconds?: number (default: 900), responseContentType?: string }
+  - Response: 200 { url, bucket, key }
+
 Users
 - GET /users/:id
   - Response: 200 <user row> | 404
@@ -185,6 +195,7 @@ All endpoints have sample Bruno requests under the bruno/ directory. For example
 - Meetups: bruno/Meetups/*
 - Bookmarks: bruno/Bookmarks/*
 - Requests: bruno/Requests/*
+- Storage: bruno/Storage/*
 - Users: bruno/Users/*
 
 Error responses

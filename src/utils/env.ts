@@ -1,5 +1,5 @@
-import { z } from "zod";
-import "dotenv/config";
+import { z } from 'zod';
+import 'dotenv/config';
 
 const schema = z.object({
   DATABASE_URL: z.string().url(),
@@ -15,6 +15,11 @@ const schema = z.object({
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_REDIECT_URL: z.string(),
+  // AWS S3
+  AWS_REGION: z.string().optional(),
+  AWS_ACCESS_KEY_ID: z.string().optional(),
+  AWS_SECRET_ACCESS_KEY: z.string().optional(),
+  S3_BUCKET: z.string().optional(),
 });
 
 const parsed = schema.parse({
@@ -29,6 +34,10 @@ const parsed = schema.parse({
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIECT_URL: process.env.GOOGLE_REDIECT_URL,
+  AWS_REGION: process.env.AWS_BUCKET_REGION,
+  AWS_ACCESS_KEY_ID: process.env.AWS_BUCKET_ACCESS_KEY,
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_BUCKET_SECRET_KEY,
+  S3_BUCKET: process.env.AWS_BUCKET_NAME,
 });
 
 export const env = {

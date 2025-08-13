@@ -14,6 +14,7 @@
     "seed": "tsx src/scripts/seed.ts",
     "seed:all": "tsx src/scripts/seeds/seed-all.ts",
     "seed:users": "tsx src/scripts/seeds/users.ts",
+    "seed:user-location": "tsx src/scripts/seeds/userLocation.ts",
     "seed:user-states": "tsx src/scripts/seeds/userStates.ts",
     "seed:catalog-activities": "tsx src/scripts/seeds/catalogActivities.ts",
     "seed:catalog-traits": "tsx src/scripts/seeds/catalogTraits.ts",
@@ -24,12 +25,15 @@
     "seed:app-settings": "tsx src/scripts/seeds/appSettings.ts",
     "db:reset-and-seed": "tsx src/scripts/reset-and-seed.ts",
     "db:truncate-all": "tsx src/scripts/truncate-all.ts",
-    "seed:bookmarks": "tsx src/scripts/seeds/bookmarks.ts"
+    "fix:app-settings-timestamps": "tsx src/scripts/fixes/fixAppSettingsTimestamps.ts",
+    "seed:bookmarks": "tsx src/scripts/seeds/bookmarks.ts",
+    "seed:demo-users": "tsx src/scripts/seeds/demoUsersCluster.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.3",
     "@hono/zod-validator": "^0.2.2",
     "arctic": "^3.7.0",
+    "aws-sdk": "^2.1692.0",
     "dotenv": "^17.2.1",
     "drizzle-orm": "^0.40.1",
     "drizzle-seed": "^0.3.1",
@@ -42,7 +46,9 @@
     "typedi": "^0.10.0",
     "ua-parser-js": "^2.0.4",
     "uuid": "^9.0.1",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@aws-sdk/client-s3": "^3.645.0",
+    "@aws-sdk/s3-request-presigner": "^3.645.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
