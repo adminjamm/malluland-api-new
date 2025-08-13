@@ -92,10 +92,12 @@ export class UsersRepository {
   // Interests
   async replaceInterests(userId: string, interestIds: number[]) {
     // simple replace strategy
-    // delete existing
-    await this.db.delete(userInterests).where(eq(userInterests.userId, userId));
-    // insert
     if (interestIds.length) {
+      // delete existing
+      await this.db
+        .delete(userInterests)
+        .where(eq(userInterests.userId, userId));
+      // insert
       const rows = interestIds.map((id, idx) => ({
         userId,
         interestId: id,
@@ -114,8 +116,8 @@ export class UsersRepository {
 
   // Traits
   async replaceTraits(userId: string, traitIds: number[]) {
-    await this.db.delete(userTraits).where(eq(userTraits.userId, userId));
     if (traitIds.length) {
+      await this.db.delete(userTraits).where(eq(userTraits.userId, userId));
       const rows = traitIds.map((id, idx) => ({
         userId,
         traitId: id,
@@ -134,10 +136,10 @@ export class UsersRepository {
 
   // Favorite actors
   async replaceFavoriteActors(userId: string, actorIds: number[]) {
-    await this.db
-      .delete(userFavoriteActors)
-      .where(eq(userFavoriteActors.userId, userId));
     if (actorIds.length) {
+      await this.db
+        .delete(userFavoriteActors)
+        .where(eq(userFavoriteActors.userId, userId));
       const rows = actorIds.map((id, idx) => ({
         userId,
         actorId: id,
@@ -156,10 +158,10 @@ export class UsersRepository {
 
   // Favorite actresses
   async replaceFavoriteActresses(userId: string, actressIds: number[]) {
-    await this.db
-      .delete(userFavoriteActresses)
-      .where(eq(userFavoriteActresses.userId, userId));
     if (actressIds.length) {
+      await this.db
+        .delete(userFavoriteActresses)
+        .where(eq(userFavoriteActresses.userId, userId));
       const rows = actressIds.map((id, idx) => ({
         userId,
         actressId: id,
@@ -181,9 +183,9 @@ export class UsersRepository {
     userId: string,
     links: { platform: string; handle: string; show_profile: boolean }[]
   ) {
-    // delete and insert new set
-    await this.db.delete(socialLinks).where(eq(socialLinks.userId, userId));
     if (links.length) {
+      // delete and insert new set
+      await this.db.delete(socialLinks).where(eq(socialLinks.userId, userId));
       const now = new Date();
       const rows = links.map(
         (l) =>

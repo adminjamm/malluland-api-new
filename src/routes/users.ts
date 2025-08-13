@@ -94,16 +94,16 @@ usersRouter.get(
 );
 
 // Users
-usersRouter.get(
-  "/:id",
-  authorize({ bypassOnboardingCheck: true }),
-  async (c) => {
-    const id = c.req.param("id");
-    const [row] = await svc().getUser(id);
-    if (!row) return c.json({ error: "Not found" }, 404);
-    return c.json(row);
-  }
-);
+// usersRouter.get(
+//   "/:id",
+//   authorize({ bypassOnboardingCheck: true }),
+//   async (c) => {
+//     const id = c.req.param("id");
+//     const [row] = await svc().getUser(id);
+//     if (!row) return c.json({ error: "Not found" }, 404);
+//     return c.json(row);
+//   }
+// );
 
 usersRouter.put(
   "/profile",
