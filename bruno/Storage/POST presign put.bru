@@ -1,0 +1,27 @@
+meta {
+  name: Storage: Presign PUT
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{endpoint}}/storage/presign/put
+  body: json
+  auth: inherit
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "contentType": "image/jpeg",
+    "expiresInSeconds": 900,
+    "acl": "private"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
