@@ -10,6 +10,7 @@ import { bookmarksRouter } from "./routes/bookmarks";
 import { usersRouter } from "./routes/users";
 import { actorsRouter } from "./routes/actors";
 import { requestsRouter } from "./routes/requests";
+import { storageRouter } from "./routes/storage";
 // import { createDb } from "./infra/db";
 import { env } from "./utils/env";
 import { authRouter } from "./routes/auth";
@@ -31,6 +32,7 @@ app.route("/bookmarks", bookmarksRouter);
 app.route("/users", usersRouter);
 app.route("/actors", actorsRouter);
 app.route("/requests", requestsRouter);
+app.route("/storage", storageRouter);
 
 const port = env.PORT ?? 8787;
 console.log(`Server listening on http://localhost:${port}`);
