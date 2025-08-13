@@ -556,3 +556,87 @@ paths:
         - $ref: '#/components/parameters/PageParam'
       responses:
         '200': { description: Actors, content: { application/json: { schema: { type: object } } } }
+  /storage/presign/put:
+    post:
+      summary: Generate S3 pre-signed PUT URL
+      description: Returns a pre-signed URL to upload an object to the configured S3 bucket.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  description: Optional object key. If omitted, a random key will be generated.
+                contentType:
+                  type: string
+                  description: MIME type of the object. Defaults to image/jpeg.
+                  default: image/jpeg
+                expiresInSeconds:
+                  type: integer
+                  minimum: 1
+                  description: Expiry in seconds for the signed URL. Defaults to 900 (15 minutes).
+                acl:
+                  type: string
+                  enum: [private, public-read]
+                  description: Canned ACL for the uploaded object. Defaults to private.
+      responses:
+        '200':
+          description: Pre-signed PUT URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                  bucket:
+                    type: string
+                  key:
+                    type: string
+        '400':
+          description: Bad request
+  /storage/presign/get:
+    post:
+      summary: Generate S3 pre-signed GET URL
+      description: Returns a pre-signed URL to download an object from the configured S3 bucket.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [key]
+              properties:
+                key:
+                  type: string
+                  description: Object key to sign for download.
+                expiresInSeconds:
+                  type: integer
+                  minimum: 1
+                  description: Expiry in seconds for the signed URL. Defaults to 900 (15 minutes).
+                responseContentType:
+                  type: string
+                  description: Optional response content type for the GET response.
+      responses:
+        '200':
+          description: Pre-signed GET URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                  bucket:
+                    type: string
+                  key:
+                    type: string
+        '404':
+          description: Not found
+        '400':
+          description: Bad request
