@@ -11,8 +11,7 @@ import {
   socialLinks,
   userFavoritesText,
 } from "../db/schema";
-import { eq, and, inArray } from "drizzle-orm";
-import { randomUUID } from "node:crypto";
+import { eq, and } from "drizzle-orm";
 
 export type Db = NodePgDatabase;
 
@@ -44,7 +43,6 @@ export class UsersRepository {
     }
   ) {
     const row = {
-      id: randomUUID(),
       userId,
       originalUrl: photo.originalUrl,
       optimizedUrl: photo.optimizedUrl ?? null,
@@ -56,7 +54,15 @@ export class UsersRepository {
   }
   listPhotos(userId: string) {
     return this.db
-      .select()
+      .select({
+        id: userPhotos.id,
+        originalUrl: userPhotos.originalUrl,
+        optimizedUrl: userPhotos.optimizedUrl,
+        imageType: userPhotos.imageType,
+        position: userPhotos.position,
+        isActive: userPhotos.isActive,
+        createdAt: userPhotos.createdAt,
+      })
       .from(userPhotos)
       .where(eq(userPhotos.userId, userId))
       .orderBy(userPhotos.position);
@@ -69,13 +75,10 @@ export class UsersRepository {
     status: string = "pending"
   ) {
     const row = {
-      id: randomUUID(),
       userId,
       selfieUrl,
       status,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    } as any;
+    };
     await this.db.insert(userSelfie).values(row);
     return row;
   }
