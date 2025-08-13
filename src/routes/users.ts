@@ -58,6 +58,10 @@ usersRouter.get(
             : 0
         )[0] || [];
 
+    const profilePhotos = photos.filter(
+      (p) => p.imageType !== "avatar" && p.isActive === true
+    );
+
     const favoritesGrouped = favoritesText
       .filter((item) => item.category !== null)
       .reduce((acc, item) => {
@@ -73,7 +77,7 @@ usersRouter.get(
 
     const profileData = {
       ...user,
-      photos,
+      photos: profilePhotos,
       avatar,
       selfies,
       interests,
@@ -90,16 +94,16 @@ usersRouter.get(
 );
 
 // Users
-usersRouter.get(
-  "/:id",
-  authorize({ bypassOnboardingCheck: true }),
-  async (c) => {
-    const id = c.req.param("id");
-    const [row] = await svc().getUser(id);
-    if (!row) return c.json({ error: "Not found" }, 404);
-    return c.json(row);
-  }
-);
+// usersRouter.get(
+//   "/:id",
+//   authorize({ bypassOnboardingCheck: true }),
+//   async (c) => {
+//     const id = c.req.param("id");
+//     const [row] = await svc().getUser(id);
+//     if (!row) return c.json({ error: "Not found" }, 404);
+//     return c.json(row);
+//   }
+// );
 
 usersRouter.put(
   "/profile",
@@ -156,7 +160,7 @@ usersRouter.post(
   zValidator(
     "json",
     z.object({
-      originalUrl: z.string().url(),
+      originalUrl: z.string(),
       imageType: z.string(),
       position: z.number().int().nonnegative(),
     })
@@ -164,6 +168,7 @@ usersRouter.post(
   async (c) => {
     const userId = c.get("profile").id;
     const data = c.req.valid("json");
+    console.log(data);
     const row = await svc().addPhoto(userId, data);
     return c.json({
       data: row,

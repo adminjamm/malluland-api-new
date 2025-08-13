@@ -1,8 +1,9 @@
-import { z } from 'zod';
-import 'dotenv/config';
+import { z } from "zod";
+import "dotenv/config";
 
 const schema = z.object({
   DATABASE_URL: z.string().url(),
+  NODE_ENV: z.enum(["development", "production"]),
   PORT: z.coerce.number().int().positive().optional(),
   KRAKEN_API_KEY: z.string().optional(),
   KRAKEN_API_SECRET: z.string().optional(),
@@ -16,14 +17,15 @@ const schema = z.object({
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_REDIECT_URL: z.string(),
   // AWS S3
-  AWS_REGION: z.string().optional(),
-  AWS_ACCESS_KEY_ID: z.string().optional(),
-  AWS_SECRET_ACCESS_KEY: z.string().optional(),
-  S3_BUCKET: z.string().optional(),
+  AWS_REGION: z.string(),
+  AWS_ACCESS_KEY_ID: z.string(),
+  AWS_SECRET_ACCESS_KEY: z.string(),
+  S3_BUCKET: z.string(),
 });
 
 const parsed = schema.parse({
   DATABASE_URL: process.env.DATABASE_URL,
+  NODE_ENV: process.env.NODE_ENV,
   PORT: process.env.PORT,
   KRAKEN_API_KEY: process.env.KRAKEN_API_KEY,
   KRAKEN_API_SECRET: process.env.KRAKEN_API_SECRET,

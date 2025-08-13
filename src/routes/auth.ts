@@ -157,6 +157,7 @@ async function handleOAuthCallback({
         .values({
           name: newName,
           email: userEmail,
+          userState: "pending",
         })
         .returning();
 
