@@ -1,166 +1,368 @@
-import { Hono } from 'hono';
-import { z } from 'zod';
-import { zValidator } from '@hono/zod-validator';
-import { Container } from 'typedi';
-import { UsersService } from '../services/users.service';
+import { Hono } from "hono";
+import { z } from "zod";
+import { zValidator } from "@hono/zod-validator";
+import { Container } from "typedi";
+import { UsersService } from "../services/users.service";
+import { authorize } from "../middleware/auth";
+import { db } from "../db";
+import { userFavoritesText, userSelfie } from "../db/schema";
+import { desc, eq } from "drizzle-orm";
 
 export const usersRouter = new Hono();
 
 const svc = () => Container.get(UsersService);
 
+// User profile
+usersRouter.get(
+  "/me",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+
+    const [
+      [user],
+      photos,
+      selfies,
+      interests,
+      traits,
+      favoriteActors,
+      favoriteActresses,
+      favoritesText,
+      links,
+    ] = await Promise.all([
+      svc().getUser(userId),
+      await svc().listPhotos(userId),
+      svc().listSelfies(userId).orderBy(desc(userSelfie.createdAt)).limit(1),
+      svc().listInterests(userId),
+      svc().listTraits(userId),
+      svc().listFavoriteActors(userId),
+      svc().listFavoriteActresses(userId),
+      db
+        .select({
+          id: userFavoritesText.id,
+          category: userFavoritesText.category,
+          text: userFavoritesText.textValue,
+          position: userFavoritesText.position,
+        })
+        .from(userFavoritesText)
+        .where(eq(userFavoritesText.userId, userId)),
+      svc().listSocialLinks(userId),
+    ]);
+
+    const avatar =
+      photos
+        .filter((p) => p.imageType === "avatar" && p.isActive === true)
+        .sort((a, b) =>
+          b.createdAt && a.createdAt
+            ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            : 0
+        )[0] || [];
+
+    const favoritesGrouped = favoritesText
+      .filter((item) => item.category !== null)
+      .reduce((acc, item) => {
+        const category = item.category!;
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(item);
+        return acc;
+      }, {} as Record<string, typeof favoritesText>);
+
+    if (!user) return c.json({ error: "Not found" }, 404);
+
+    const profileData = {
+      ...user,
+      photos,
+      avatar,
+      selfies,
+      interests,
+      traits,
+      favoriteActors,
+      favoriteActresses,
+      favoritesGrouped,
+      socialLinks: links,
+    };
+    return c.json({
+      data: profileData,
+    });
+  }
+);
+
 // Users
-usersRouter.get('/:id', async (c) => {
-  const id = c.req.param('id');
-  const [row] = await svc().getUser(id);
-  if (!row) return c.json({ error: 'Not found' }, 404);
-  return c.json(row);
-});
+usersRouter.get(
+  "/:id",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const id = c.req.param("id");
+    const [row] = await svc().getUser(id);
+    if (!row) return c.json({ error: "Not found" }, 404);
+    return c.json(row);
+  }
+);
 
 usersRouter.put(
-  '/:id',
-  zValidator('json', z.object({
-    name: z.string().optional(),
-    gender: z.string().optional(),
-    city: z.string().optional(),
-    state: z.string().optional(),
-    country: z.string().optional(),
-    company: z.string().max(50).optional(),
-    position: z.string().max(50).optional(),
-    bio: z.string().max(150).optional(),
-  })),
+  "/profile",
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator(
+    "json",
+    z.object({
+      name: z.string().optional(),
+      gender: z.string().optional(),
+      dob: z.coerce
+        .date()
+        .optional()
+        .refine(
+          (date) => {
+            if (!date) return true;
+            const today = new Date();
+            const birthDate = new Date(date);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (
+              monthDiff < 0 ||
+              (monthDiff === 0 && today.getDate() < birthDate.getDate())
+            ) {
+              age--;
+            }
+            return age >= 18;
+          },
+          { message: "You must be at least 18 years old" }
+        )
+        .transform((date) => date?.toDateString()),
+      city: z.string().optional(),
+      state: z.string().optional(),
+      country: z.string().optional(),
+      company: z.string().max(50).optional(),
+      position: z.string().max(50).optional(),
+      bio: z.string().max(150).optional(),
+      avatar: z.string().optional(),
+    })
+  ),
   async (c) => {
-    const id = c.req.param('id');
-    const body = c.req.valid('json');
-    const updated = await svc().updateUser(id, body);
-    return c.json(updated);
+    const userId = c.get("profile").id;
+    const body = c.req.valid("json");
+    const user = await svc().updateUser(userId, body);
+    return c.json({
+      data: user,
+    });
   }
 );
 
 // Photos
 usersRouter.post(
-  '/:id/photos',
-  zValidator('json', z.object({
-    originalUrl: z.string().url(),
-    optimizedUrl: z.string().url().nullable().optional(),
-    imageType: z.string(),
-    position: z.number().int().nonnegative(),
-  })),
+  "/photos",
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator(
+    "json",
+    z.object({
+      originalUrl: z.string().url(),
+      imageType: z.string(),
+      position: z.number().int().nonnegative(),
+    })
+  ),
   async (c) => {
-    const id = c.req.param('id');
-    const data = c.req.valid('json');
-    const row = await svc().addPhoto(id, data);
-    return c.json(row, 201);
+    const userId = c.get("profile").id;
+    const data = c.req.valid("json");
+    const row = await svc().addPhoto(userId, data);
+    return c.json({
+      data: row,
+    });
   }
 );
-usersRouter.get('/:id/photos', async (c) => {
-  const id = c.req.param('id');
-  const rows = await svc().listPhotos(id);
-  return c.json(rows);
-});
+usersRouter.get(
+  "/photos",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const rows = await svc().listPhotos(userId);
+    return c.json({ data: rows });
+  }
+);
 
 // Selfies
 usersRouter.post(
-  '/:id/selfies',
-  zValidator('json', z.object({ selfieUrl: z.string().url(), status: z.string().optional() })),
+  "/selfies",
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator(
+    "json",
+    z.object({ selfieUrl: z.string().url(), status: z.string().optional() })
+  ),
   async (c) => {
-    const id = c.req.param('id');
-    const { selfieUrl } = c.req.valid('json');
-    const row = await svc().addSelfie(id, selfieUrl);
-    return c.json(row, 201);
+    const userId = c.get("profile").id;
+    const { selfieUrl } = c.req.valid("json");
+    const row = await svc().addSelfie(userId, selfieUrl);
+    return c.json({ data: row });
   }
 );
-usersRouter.get('/:id/selfies', async (c) => {
-  const id = c.req.param('id');
-  const rows = await svc().listSelfies(id);
-  return c.json(rows);
-});
+usersRouter.get(
+  "/selfies",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const rows = await svc().listSelfies(userId);
+    return c.json({ data: rows });
+  }
+);
 
 // Interests
 usersRouter.post(
-  '/:id/interests',
-  zValidator('json', z.object({ interestIds: z.array(z.number().int()).min(1) })),
+  "/interests",
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator(
+    "json",
+    z.object({ interestIds: z.array(z.number().int()).min(1) })
+  ),
   async (c) => {
-    const id = c.req.param('id');
-    const { interestIds } = c.req.valid('json');
-    await svc().replaceInterests(id, interestIds);
-    const rows = await svc().listInterests(id);
-    return c.json(rows, 201);
+    const userId = c.get("profile").id;
+    const { interestIds } = c.req.valid("json");
+    await svc().replaceInterests(userId, interestIds);
+    const rows = await svc().listInterests(userId);
+    return c.json({ data: rows });
   }
 );
-usersRouter.get('/:id/interests', async (c) => {
-  const id = c.req.param('id');
-  const rows = await svc().listInterests(id);
-  return c.json(rows);
-});
+usersRouter.get(
+  "/interests",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const rows = await svc().listInterests(userId);
+    return c.json({ data: rows });
+  }
+);
 
 // Traits
 usersRouter.post(
-  '/:id/traits',
-  zValidator('json', z.object({ traitIds: z.array(z.number().int()).min(1) })),
+  "/traits",
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator("json", z.object({ traitIds: z.array(z.number().int()).min(1) })),
   async (c) => {
-    const id = c.req.param('id');
-    const { traitIds } = c.req.valid('json');
-    await svc().replaceTraits(id, traitIds);
-    const rows = await svc().listTraits(id);
-    return c.json(rows, 201);
+    const userId = c.get("profile").id;
+    const { traitIds } = c.req.valid("json");
+    await svc().replaceTraits(userId, traitIds);
+    const rows = await svc().listTraits(userId);
+    return c.json({ data: rows });
   }
 );
-usersRouter.get('/:id/traits', async (c) => {
-  const id = c.req.param('id');
-  const rows = await svc().listTraits(id);
-  return c.json(rows);
-});
+usersRouter.get(
+  "/traits",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const rows = await svc().listTraits(userId);
+    return c.json({ data: rows });
+  }
+);
 
 // Favorite actors
 usersRouter.post(
-  '/:id/favorite-actors',
-  zValidator('json', z.object({ actorIds: z.array(z.number().int()).min(1) })),
+  "/favorite-actors",
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator("json", z.object({ actorIds: z.array(z.number().int()).min(1) })),
   async (c) => {
-    const id = c.req.param('id');
-    const { actorIds } = c.req.valid('json');
-    await svc().replaceFavoriteActors(id, actorIds);
-    const rows = await svc().listFavoriteActors(id);
-    return c.json(rows, 201);
+    const userId = c.get("profile").id;
+    const { actorIds } = c.req.valid("json");
+    await svc().replaceFavoriteActors(userId, actorIds);
+    const rows = await svc().listFavoriteActors(userId);
+    return c.json({ data: rows });
   }
 );
-usersRouter.get('/:id/favorite-actors', async (c) => {
-  const id = c.req.param('id');
-  const rows = await svc().listFavoriteActors(id);
-  return c.json(rows);
-});
+usersRouter.get(
+  "/favorite-actors",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const rows = await svc().listFavoriteActors(userId);
+    return c.json({ data: rows });
+  }
+);
 
 // Favorite actresses
 usersRouter.post(
-  '/:id/favorite-actresses',
-  zValidator('json', z.object({ actressIds: z.array(z.number().int()).min(1) })),
+  "/favorite-actresses",
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator(
+    "json",
+    z.object({ actressIds: z.array(z.number().int()).min(1) })
+  ),
   async (c) => {
-    const id = c.req.param('id');
-    const { actressIds } = c.req.valid('json');
-    await svc().replaceFavoriteActresses(id, actressIds);
-    const rows = await svc().listFavoriteActresses(id);
-    return c.json(rows, 201);
+    const userId = c.get("profile").id;
+    const { actressIds } = c.req.valid("json");
+    await svc().replaceFavoriteActresses(userId, actressIds);
+    const rows = await svc().listFavoriteActresses(userId);
+    return c.json({ data: rows });
   }
 );
-usersRouter.get('/:id/favorite-actresses', async (c) => {
-  const id = c.req.param('id');
-  const rows = await svc().listFavoriteActresses(id);
-  return c.json(rows);
-});
+usersRouter.get(
+  "/favorite-actresses",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const rows = await svc().listFavoriteActresses(userId);
+    return c.json({ data: rows });
+  }
+);
 
 // Social links
 usersRouter.post(
-  '/:id/social-links',
-  zValidator('json', z.object({ links: z.array(z.object({ platform: z.string(), handle: z.string() })) })),
+  "/social-links",
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator(
+    "json",
+    z.object({
+      links: z.array(
+        z.object({
+          platform: z.string(),
+          handle: z.string(),
+          show_profile: z.boolean(),
+        })
+      ),
+    })
+  ),
   async (c) => {
-    const id = c.req.param('id');
-    const { links } = c.req.valid('json');
-    await svc().replaceSocialLinks(id, links);
-    const rows = await svc().listSocialLinks(id);
-    return c.json(rows, 201);
+    const userId = c.get("profile").id;
+    const { links } = c.req.valid("json");
+    await svc().replaceSocialLinks(userId, links);
+    const rows = await svc().listSocialLinks(userId);
+    return c.json({ data: rows });
   }
 );
-usersRouter.get('/:id/social-links', async (c) => {
-  const id = c.req.param('id');
-  const rows = await svc().listSocialLinks(id);
-  return c.json(rows);
+usersRouter.get(
+  "/social-links",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const rows = await svc().listSocialLinks(userId);
+    return c.json({ data: rows });
+  }
+);
+
+const userFavoritesTextSchema = z.object({
+  category: z.string(),
+  values: z.array(z.string().max(150)).min(1),
 });
+
+usersRouter.post(
+  "/user-favorites",
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator("json", userFavoritesTextSchema),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const { category, values } = c.req.valid("json");
+
+    const rows = await svc().replaceUserFavoritesText(userId, category, values);
+    return c.json({ data: rows });
+  }
+);
+
+usersRouter.get(
+  "/user-favorites",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const category = c.req.query("category");
+
+    const rows = await svc().listUserFavorites(userId, category);
+    return c.json({ data: rows });
+  }
+);

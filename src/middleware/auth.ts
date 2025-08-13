@@ -21,7 +21,8 @@ interface AuthVariables {
 const getProfileFromToken = async (
   token: string
 ): Promise<Profile | undefined> => {
-  const decoded = JwtPayloadSchema.parse(jwt.verify(token, env.JWT_SECRET));
+  const jwtToken = token.replace(/^Bearer\s+/, "");
+  const decoded = JwtPayloadSchema.parse(jwt.verify(jwtToken, env.JWT_SECRET));
 
   const profileData = await db.query.users.findFirst({
     where: and(
