@@ -36,15 +36,11 @@ const authCallbackSchema = z.object({
   code: z.string(),
 });
 
-authRouter.get(
-  "/google/url",
+authRouter.get("/google/url", async (c) => {
+  const url = getGoogleAuthUrl("mobile");
 
-  async (c) => {
-    const url = getGoogleAuthUrl("mobile");
-
-    return c.json({ data: url.toString() });
-  }
-);
+  return c.json({ data: url.toString() });
+});
 
 authRouter.get(
   "/google/callback",

@@ -1,0 +1,15 @@
+meta {
+  name: Google login
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/auth/google/url
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
