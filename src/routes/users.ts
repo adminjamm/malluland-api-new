@@ -141,6 +141,8 @@ usersRouter.put(
       position: z.string().max(50).optional(),
       bio: z.string().max(150).optional(),
       avatar: z.string().optional(),
+      userState: z.string().optional(),
+      isProfileOnboardingCompleted: z.boolean().optional(),
     })
   ),
   async (c) => {

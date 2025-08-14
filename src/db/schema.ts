@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   uuid,
@@ -254,7 +255,8 @@ export const adminLogsNew = pgTable("admin_logs", {
 
 export const meetups = pgTable("meetups", {
   id: uuid("id").primaryKey().defaultRandom(),
-  hostId: uuid("host_id"),
+  chatRoomId: uuid("chat_room_id").references(() => chatRooms.id),
+  hostId: uuid("host_id").references(() => users.id),
   name: text("name"), // 10-35
   activityId: integer("activity_id"), // FK to catalog_meetup_activities (mapped here to catalog_activities)
   guests: integer("guests"), // 1-7
@@ -297,42 +299,122 @@ export const meetupAttendees = pgTable("meetup_attendees", {
 
 export const chatRequests = pgTable("chat_requests", {
   id: uuid("id").primaryKey().defaultRandom(),
-  fromUserId: uuid("from_user_id"),
-  toUserId: uuid("to_user_id"),
+  chatRoomId: uuid("chat_room_id").references(() => chatRooms.id),
+  fromUserId: uuid("from_user_id").references(() => users.id),
+  toUserId: uuid("to_user_id").references(() => users.id),
   message: text("message"), // <= 500
   status: text("status"), // pending | accepted | archived | declined
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const meetupRelations = relations(meetups, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [meetups.hostId],
+    references: [users.id],
+  }),
+  chatRoom: one(chatRooms, {
+    fields: [meetups.chatRoomId],
+    references: [chatRooms.id],
+  }),
+  joinRequests: many(meetupRequests),
+}));
+
+export const chatRequestRelations = relations(chatRequests, ({ one }) => ({
+  chatRoom: one(chatRooms, {
+    fields: [chatRequests.chatRoomId],
+    references: [chatRooms.id],
+  }),
+  requestor: one(users, {
+    fields: [chatRequests.fromUserId],
+    references: [users.id],
+  }),
+}));
+
 export const chatRooms = pgTable("chat_rooms", {
   id: uuid("id").primaryKey().defaultRandom(),
   type: text("type"), // DM | meetup
   meetupId: uuid("meetup_id"), // nullable for DM
+  deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const chatRoomParticipants = pgTable("chat_room_participants", {
-  chatRoomId: uuid("chat_room_id"),
-  userId: uuid("user_id"),
+  id: uuid("id").primaryKey().defaultRandom(),
+  chatroomId: uuid("chatroom_id")
+    .references(() => chatRooms.id)
+    .notNull(),
+  participantId: uuid("participant_id")
+    .references(() => users.id)
+    .notNull(),
   lastReadMessageId: uuid("last_read_message_id"), // nullable
   unreadCount: integer("unread_count"),
   joinedAt: timestamp("joined_at"),
+  deletedAt: timestamp("deleted_at"),
+  role: text("role").notNull().default("member"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  status: text("status"),
+  status: text("status").notNull().default("active"),
 });
 
 export const chatMessages = pgTable("chat_messages", {
   id: uuid("id").primaryKey().defaultRandom(),
-  chatId: uuid("chat_id"),
-  senderUserId: uuid("sender_user_id"), // nullable for system
+  chatroomId: uuid("chatroom_id")
+    .references(() => chatRooms.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  senderId: uuid("sender_id")
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  message: json("message")
+    .$type<{
+      systemText?: string;
+      text?: string;
+      timestamp: number | string;
+      filePath?: string;
+      fileMimeType?: string;
+      files?: {
+        filePath?: string;
+        fileMimeType?: string;
+      }[];
+      reply?: Record<string, string>;
+    }>()
+    .notNull(),
   kind: text("kind"), // text | system
   body: text("body"), // up to 1000
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const chatroomRelations = relations(chatRooms, ({ one, many }) => ({
+  chatRequests: one(chatRequests, {
+    fields: [chatRooms.id],
+    references: [chatRequests.chatRoomId],
+  }),
+  meetup: one(meetups, {
+    fields: [chatRooms.id],
+    references: [meetups.chatRoomId],
+  }),
+  participants: many(chatRoomParticipants),
+}));
+
+export const chatroomParticipantRelation = relations(
+  chatRoomParticipants,
+  ({ one }) => ({
+    chatroom: one(chatRooms, {
+      fields: [chatRoomParticipants.chatroomId],
+      references: [chatRooms.id],
+    }),
+    participant: one(users, {
+      fields: [chatRoomParticipants.participantId],
+      references: [users.id],
+    }),
+  })
+);
 
 export const appSettings = pgTable("app_settings", {
   id: uuid("id").primaryKey().defaultRandom(),

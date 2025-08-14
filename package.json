@@ -9,6 +9,7 @@
     "start": "node dist/index.js",
     "drizzle:generate": "drizzle-kit generate",
     "drizzle:migrate": "drizzle-kit migrate",
+    "drizzle:push": "drizzle-kit push",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "seed": "tsx src/scripts/seed.ts",

@@ -15,6 +15,7 @@ import { storageRouter } from "./routes/storage";
 import { env } from "./utils/env";
 import { authRouter } from "./routes/auth";
 import { db } from "./db";
+import { chatsRouter } from "./routes/chats";
 
 const app = new Hono();
 app.use("*", logger());
@@ -33,6 +34,7 @@ app.route("/users", usersRouter);
 app.route("/actors", actorsRouter);
 app.route("/requests", requestsRouter);
 app.route("/storage", storageRouter);
+app.route("/chats", chatsRouter);
 
 const port = env.PORT ?? 8787;
 console.log(`Server listening on http://localhost:${port}`);
