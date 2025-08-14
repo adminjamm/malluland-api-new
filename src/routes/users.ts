@@ -92,7 +92,7 @@ usersRouter.get(
       age: computeAgeFromDob((user as any).dob ?? null),
       photos: profilePhotos,
       avatar,
-      selfies,
+      selfie: selfies && selfies.length > 0 ? selfies[0] : null,
       interests,
       traits,
       favoriteActors,
