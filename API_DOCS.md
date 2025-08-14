@@ -97,7 +97,32 @@ Bookmarks
   - Headers: x-user-id
   - Response: 200 { ok: true }
 
-Requests
+## Requests
+
+### GET /chats/rooms
+List chat rooms for the authenticated user. Includes unread counts, last message metadata, and participant user IDs.
+
+Query params:
+- page (integer, default 1)
+
+Response 200:
+{
+  "page": 1,
+  "pageSize": 20,
+  "items": [
+    {
+      "id": "uuid",
+      "type": "DM" | "meetup",
+      "meetup_id": "uuid|null",
+      "unread_count": 0,
+      "last_message_id": "uuid|null",
+      "last_message_kind": "text|system|null",
+      "last_message_body": "string|null",
+      "last_message_at": "ISO date|null",
+      "participant_user_ids": ["uuid", "uuid"]
+    }
+  ]
+}
 - GET /requests
   - Headers: x-user-id
   - Query: filter (all|meetups|chats, default all), page (default 1)
@@ -129,6 +154,41 @@ Storage
   - Response: 200 { url, bucket, key }
 
 Users
+- GET /users/settings
+  - Response: 200 { data: { userId, chatAudience, pushEnabled } | null }
+- PUT /users/settings
+  - Body: { chatAudience?: 'anyone'|'men'|'women'|'others'|null, pushEnabled?: boolean|null }
+  - Response: 200 { data: { userId, chatAudience, pushEnabled } }
+
+- GET /users/location
+  - Headers: x-user-id
+  - Response: 200 { data: { userId, lat, lng, closestAirportCode, createdAt, updatedAt } | null }
+
+- PUT /users/location
+  - Headers: x-user-id
+  - Body: { lat?: number|null, lng?: number|null, closestAirportCode?: string|null }
+  - Behavior: If lat/lng are provided (or present from an existing row) and closestAirportCode is not provided, the server auto-fills closestAirportCode using the nearest airport by coordinates.
+  - Response: 200 { data: { userId, lat, lng, closestAirportCode, createdAt, updatedAt } }
+
+- Favorites text (per-category, max 5 entries; positions start at 1)
+  - GET /users/user-favorites?category=<optional>
+    - Headers: x-user-id
+    - Response: 200 { data: [ { userId, category, textValue, position } ] }
+  - PUT /users/user-favorites
+    - Headers: x-user-id
+    - Body: { category: string, values: string[] (max 5) }
+    - Behavior: Replace-all strategy. Deletes existing entries for the category and inserts up to 5 items with positions 1..n.
+    - Response: 200 { data: [ { userId, category, textValue, position } ] }
+  - POST /users/user-favorites (same as PUT)
+    - Headers: x-user-id
+    - Body: { category: string, values: string[] (max 5) }
+    - Response: 200 { data: [ { userId, category, textValue, position } ] }
+  - POST /users/user-favorites/add
+    - Headers: x-user-id
+    - Body: { category: string, value: string }
+    - Behavior: Adds a single favorite if total < 5, auto-assigns next position; otherwise returns an error.
+    - Response: 200 { data: { userId, category, textValue, position } }
+
 - GET /users/:id
   - Response: 200 <user row> | 404
 
@@ -188,6 +248,11 @@ Users
 Actors
 - GET /actors?page=1
   - Response: 200 { page, pageSize: 20, data }
+
+Airports
+- GET /airports/nearest?lat={lat}&lng={lng}
+  - Query: lat (-90..90), lng (-180..180)
+  - Response: 200 { data: { iata, airportName, distanceKm } } | 404 if not found
 
 Examples
 All endpoints have sample Bruno requests under the bruno/ directory. For example:
