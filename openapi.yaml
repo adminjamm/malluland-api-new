@@ -341,7 +341,71 @@ paths:
         '200': { description: Removed, content: { application/json: { schema: { type: object, properties: { ok: { type: boolean } } } } } }
   /requests:
     get:
-      summary: List requests
+      summary: List requests for the authenticated user
+
+  /chats/rooms:
+    get:
+      summary: List chat rooms for the authenticated user
+      description: Returns the chat rooms in which the caller participates, including unread count and the last message metadata.
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: A paginated list of chat rooms
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  pageSize:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        type:
+                          type: string
+                          enum: [DM, meetup]
+                        meetup_id:
+                          type: string
+                          format: uuid
+                          nullable: true
+                        unread_count:
+                          type: integer
+                        last_message_id:
+                          type: string
+                          format: uuid
+                          nullable: true
+                        last_message_kind:
+                          type: string
+                          nullable: true
+                          description: text | system
+                        last_message_body:
+                          type: string
+                          nullable: true
+                        last_message_at:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        participant_user_ids:
+                          type: array
+                          items:
+                            type: string
+                            format: uuid
+        '401':
+          description: Unauthorized
       security:
         - XUserId: []
       parameters:
@@ -388,6 +452,110 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         '200': { description: Updated }
+  /users/settings:
+    get:
+      summary: Get current user's settings
+      description: Returns the settings for the authenticated user.
+      responses:
+        '200':
+          description: Settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      userId: { type: string, format: uuid }
+                      chatAudience: { type: string, enum: [anyone, men, women, others], nullable: true }
+                      pushEnabled: { type: boolean, nullable: true }
+        '401': { description: Unauthorized }
+    put:
+      summary: Upsert current user's settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chatAudience:
+                  type: string
+                  enum: [anyone, men, women, others]
+                  nullable: true
+                pushEnabled:
+                  type: boolean
+                  nullable: true
+      responses:
+        '200':
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      userId: { type: string, format: uuid }
+                      chatAudience: { type: string, enum: [anyone, men, women, others], nullable: true }
+                      pushEnabled: { type: boolean, nullable: true }
+        '401': { description: Unauthorized }
+  /users/location:
+    get:
+      summary: Get current user's location
+      description: Returns the saved location for the authenticated user.
+      responses:
+        '200':
+          description: Location
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      userId: { type: string, format: uuid }
+                      lat: { type: number, nullable: true }
+                      lng: { type: number, nullable: true }
+                      closestAirportCode: { type: string, nullable: true }
+                      createdAt: { type: string, format: date-time, nullable: true }
+                      updatedAt: { type: string, format: date-time, nullable: true }
+        '401': { description: Unauthorized }
+    put:
+      summary: Upsert current user's location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lat: { type: number, nullable: true }
+                lng: { type: number, nullable: true }
+                closestAirportCode: { type: string, nullable: true }
+      responses:
+        '200':
+          description: Updated location
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      userId: { type: string, format: uuid }
+                      lat: { type: number, nullable: true }
+                      lng: { type: number, nullable: true }
+                      closestAirportCode: { type: string, nullable: true }
+                      createdAt: { type: string, format: date-time, nullable: true }
+                      updatedAt: { type: string, format: date-time, nullable: true }
+        '401': { description: Unauthorized }
   /users/{id}:
     get:
       summary: Get user by id
@@ -549,6 +717,123 @@ paths:
       summary: List social links
       responses:
         '200': { description: Social links, content: { application/json: { schema: { type: array, items: { type: object } } } } }
+  /users/user-favorites:
+    get:
+      summary: List current user's favorite text entries
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Favorites text
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId: { type: string, format: uuid }
+                        category: { type: string }
+                        textValue: { type: string }
+                        position: { type: integer }
+    put:
+      summary: Replace all favorite text for a category (max 5)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [category, values]
+              properties:
+                category: { type: string }
+                values:
+                  type: array
+                  maxItems: 5
+                  items: { type: string, maxLength: 150 }
+      responses:
+        '200':
+          description: Updated favorites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId: { type: string, format: uuid }
+                        category: { type: string }
+                        textValue: { type: string }
+                        position: { type: integer }
+    post:
+      summary: Replace all favorite text for a category (same as PUT)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [category, values]
+              properties:
+                category: { type: string }
+                values:
+                  type: array
+                  maxItems: 5
+                  items: { type: string, maxLength: 150 }
+      responses:
+        '200':
+          description: Updated favorites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId: { type: string, format: uuid }
+                        category: { type: string }
+                        textValue: { type: string }
+                        position: { type: integer }
+  /users/user-favorites/add:
+    post:
+      summary: Add a single favorite text for a category (up to 5)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [category, value]
+              properties:
+                category: { type: string }
+                value: { type: string, maxLength: 150 }
+      responses:
+        '200':
+          description: Added favorite
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      userId: { type: string, format: uuid }
+                      category: { type: string }
+                      textValue: { type: string }
+                      position: { type: integer }
   /actors:
     get:
       summary: List actors
@@ -556,6 +841,33 @@ paths:
         - $ref: '#/components/parameters/PageParam'
       responses:
         '200': { description: Actors, content: { application/json: { schema: { type: object } } } }
+  /airports/nearest:
+    get:
+      summary: Nearest airport by coordinates
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema: { type: number, minimum: -90, maximum: 90 }
+        - name: lng
+          in: query
+          required: true
+          schema: { type: number, minimum: -180, maximum: 180 }
+      responses:
+        '200':
+          description: Nearest airport
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      iata: { type: string, nullable: true }
+                      airportName: { type: string, nullable: true }
+                      distanceKm: { type: number }
+        '404': { description: Not found }
   /storage/presign/put:
     post:
       summary: Generate S3 pre-signed PUT URL
