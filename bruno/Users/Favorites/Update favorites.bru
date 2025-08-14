@@ -1,0 +1,26 @@
+meta {
+  name: Update favorites
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/users/user-favorites
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "category":"movies",
+    "values":["hdjscdch"]
+  }
+}
+
+settings {
+  encodeUrl: true
+}

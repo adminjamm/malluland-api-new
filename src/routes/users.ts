@@ -79,7 +79,7 @@ usersRouter.get(
       ...user,
       photos: profilePhotos,
       avatar,
-      selfies,
+      selfie: selfies && selfies.length > 0 ? selfies[0] : null,
       interests,
       traits,
       favoriteActors,

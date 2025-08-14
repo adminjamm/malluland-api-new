@@ -1,0 +1,31 @@
+meta {
+  name: Update social links
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/users/social-links
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "links":[
+      {
+        "show_profile":false,
+        "handle":"djbhchdc",
+        "platform":"instagram"
+      }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+}
