@@ -5,9 +5,14 @@ meta {
 }
 
 get {
-  url: {{endpoint}}/actors?page=1
+  url: {{base_url}}/actors?page=1&size=20
   body: none
   auth: inherit
+}
+
+params:query {
+  page: 1
+  size: 20
 }
 
 settings {

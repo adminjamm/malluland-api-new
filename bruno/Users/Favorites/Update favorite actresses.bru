@@ -1,17 +1,23 @@
 meta {
-  name: Users: List favorite actresses
+  name: Update favorite actresses
   type: http
-  seq: 1
+  seq: 4
 }
 
-get {
+post {
   url: {{base_url}}/users/favorite-actresses
-  body: none
+  body: json
   auth: bearer
 }
 
 auth:bearer {
   token: {{token}}
+}
+
+body:json {
+  {
+    "actressIds":[17,12]
+  }
 }
 
 settings {
