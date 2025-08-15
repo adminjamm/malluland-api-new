@@ -1,0 +1,27 @@
+meta {
+  name: Users: Replace favorites text
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{endpoint}}/users/user-favorites
+  body: json
+  auth: inherit
+}
+
+headers {
+  content-type: application/json
+  x-user-id: 6b9ec2c8-4fc1-4069-bbf5-6d4492135270
+}
+
+body:json {
+  {
+    "category": "movies",
+    "values": ["KGF", "Bahubali", "Pushpa", "Lagaan"]
+  }
+}
+
+settings {
+  encodeUrl: true
+}

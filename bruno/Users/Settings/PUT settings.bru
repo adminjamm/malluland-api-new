@@ -1,0 +1,27 @@
+meta {
+  name: Users: Update settings
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{endpoint}}/users/settings
+  body: json
+  auth: inherit
+}
+
+headers {
+  content-type: application/json
+  x-user-id: 9c4b003a-e202-4c86-9eea-61f351e8bc07
+}
+
+body:json {
+  {
+    "chatAudience": "anyone",
+    "pushEnabled": true
+  }
+}
+
+settings {
+  encodeUrl: true
+}

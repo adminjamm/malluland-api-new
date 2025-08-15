@@ -1,0 +1,20 @@
+meta {
+  name: Airports: Get nearest IATA
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/airports/nearest?lat=34.154245417706754&lng=-118.34587418707824
+  body: none
+  auth: inherit
+}
+
+params:query {
+  lat: 34.154245417706754
+  lng: -118.34587418707824
+}
+
+settings {
+  encodeUrl: true
+}

@@ -10,8 +10,12 @@ import {
   userFavoriteActresses,
   socialLinks,
   userFavoritesText,
+  userSettings,
+  userLocation,
 } from "../db/schema";
 import { eq, and } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
+import { AirportsRepository } from "./airports.repository";
 
 export type Db = NodePgDatabase;
 
@@ -212,25 +216,55 @@ export class UsersRepository {
     category: string,
     values: string[]
   ) {
-    if (values.length) {
-      await this.db
-        .delete(userFavoritesText)
-        .where(
-          and(
-            eq(userFavoritesText.userId, userId),
-            eq(userFavoritesText.category, category)
-          )
-        );
-      const rows = values.map((val, idx) => ({
-        userId,
-        category,
-        textValue: val,
-        position: idx + 1,
-      }));
-      await this.db.insert(userFavoritesText).values(rows);
-      return rows;
+    const limited = (values ?? []).slice(0, 5);
+    // Replace strategy: delete all for category and insert up to 5
+    await this.db
+      .delete(userFavoritesText)
+      .where(
+        and(
+          eq(userFavoritesText.userId, userId),
+          eq(userFavoritesText.category, category)
+        )
+      );
+    if (limited.length === 0) return [];
+    const rows = limited.map((val, idx) => ({
+      userId,
+      category,
+      textValue: val,
+      position: idx + 1,
+    }));
+    await this.db.insert(userFavoritesText).values(rows);
+    return rows;
+  }
+
+  async addUserFavoriteText(
+    userId: string,
+    category: string,
+    value: string
+  ) {
+    // Count existing to enforce max 5 and determine next position
+    const existing = await this.db
+      .select({ position: userFavoritesText.position })
+      .from(userFavoritesText)
+      .where(
+        and(
+          eq(userFavoritesText.userId, userId),
+          eq(userFavoritesText.category, category)
+        )
+      )
+      .orderBy(userFavoritesText.position);
+    if (existing.length >= 5) {
+      throw new Error("Maximum of 5 favorites allowed per category");
     }
-    return [];
+    const nextPos = (existing[existing.length - 1]?.position ?? 0) + 1;
+    const row = {
+      userId,
+      category,
+      textValue: value,
+      position: nextPos,
+    };
+    await this.db.insert(userFavoritesText).values(row);
+    return row;
   }
 
   async listUserFavorites(userId: string, category?: string) {
@@ -245,5 +279,89 @@ export class UsersRepository {
       .from(userFavoritesText)
       .where(and(...conditions))
       .orderBy(userFavoritesText.position);
+  }
+
+  // User location
+  async getUserLocation(userId: string) {
+    const rows = await this.db.select().from(userLocation).where(eq(userLocation.userId, userId)).limit(1);
+    return rows[0] ?? null;
+  }
+
+  async upsertUserLocation(
+    userId: string,
+    data: Partial<{ lat: number | null; lng: number | null; closestAirportCode: string | null }>
+  ) {
+    const existing = await this.getUserLocation(userId);
+    const now = new Date();
+
+    // Determine coordinates to use for nearest-airport lookup
+    const lat = data.lat ?? existing?.lat ?? null;
+    const lng = data.lng ?? existing?.lng ?? null;
+
+    // Auto-compute closestAirportCode if not explicitly provided
+    let closestAirportCode: string | null | undefined = data.closestAirportCode;
+    if (closestAirportCode === undefined && typeof lat === "number" && typeof lng === "number") {
+      try {
+        const airportsRepo = Container.get(AirportsRepository);
+        const nearest = await airportsRepo.findNearestIata(lat, lng);
+        closestAirportCode = nearest?.iata ?? null;
+      } catch (e) {
+        // On failure, do not block the upsert; leave closestAirportCode as null/undefined
+        closestAirportCode = closestAirportCode ?? null;
+      }
+    }
+
+    if (existing) {
+      await this.db
+        .update(userLocation)
+        .set({
+          lat: data.lat ?? existing.lat ?? null,
+          lng: data.lng ?? existing.lng ?? null,
+          closestAirportCode: closestAirportCode ?? existing.closestAirportCode ?? null,
+          updatedAt: now,
+        } as any)
+        .where(eq(userLocation.userId, userId));
+    } else {
+      await this.db.insert(userLocation).values({
+        userId,
+        lat: lat ?? null,
+        lng: lng ?? null,
+        closestAirportCode: closestAirportCode ?? null,
+        createdAt: now,
+        updatedAt: now,
+      } as any);
+    }
+
+    return this.getUserLocation(userId);
+  }
+
+  // User settings
+  async getUserSettings(userId: string) {
+    const rows = await this.db.select().from(userSettings).where(eq(userSettings.userId, userId)).limit(1);
+    return rows[0] ?? null;
+  }
+
+  async upsertUserSettings(
+    userId: string,
+    data: Partial<{ chatAudience: string | null; pushEnabled: boolean | null }>
+  ) {
+    const existing = await this.getUserSettings(userId);
+    const now = new Date();
+    if (existing) {
+      await this.db
+        .update(userSettings)
+        .set({ ...data, updatedAt: now } as any)
+        .where(eq(userSettings.userId, userId));
+    } else {
+      await this.db.insert(userSettings).values({
+        userId,
+        chatAudience: data.chatAudience ?? null,
+        pushEnabled: data.pushEnabled ?? null,
+        createdAt: now,
+        updatedAt: now,
+      } as any);
+    }
+    const fresh = await this.getUserSettings(userId);
+    return fresh;
   }
 }

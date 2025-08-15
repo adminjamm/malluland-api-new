@@ -1,19 +1,20 @@
 meta {
-  name: Meetups: List all
+  name: Users: Get location
   type: http
   seq: 1
 }
 
 get {
-  url: {{endpoint}}/meetups?page=1
+  url: {{endpoint}}/users/location
   body: none
   auth: inherit
 }
 
 headers {
-  x-user-id: 9c4b003a-e202-4c86-9eea-61f351e8bc07
+  x-user-id: {{userId}}
 }
 
 settings {
   encodeUrl: true
 }
+

@@ -1,0 +1,28 @@
+meta {
+  name: Users: Add single favorite text
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{endpoint}}/users/user-favorites/add
+  body: json
+  auth: inherit
+}
+
+headers {
+  content-type: application/json
+  x-user-id: {{userId}}
+}
+
+body:json {
+  {
+    "category": "movies",
+    "value": "Leo"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+

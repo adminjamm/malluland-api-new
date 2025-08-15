@@ -26,6 +26,14 @@ async function main() {
   await seedAppSettings();
   await seedUsers();
 
+  // Seed user locations so People API works without explicit lat/lng
+  try {
+    const { seedUserLocation } = await import('./userLocation');
+    await seedUserLocation();
+  } catch (e) {
+    console.warn('[seed:user_location] Skipping user location seeding:', (e as Error).message);
+  }
+
   // User photos (avatars and gallery)
   try {
     const { seedUserPhotos } = await import('./userPhotos');

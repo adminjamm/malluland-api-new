@@ -79,7 +79,33 @@ export class UsersService {
     return this.repo.replaceUserFavoritesText(userId, category, values);
   }
 
+  addUserFavoriteText(userId: string, category: string, value: string) {
+    return this.repo.addUserFavoriteText(userId, category, value);
+  }
+
   listUserFavorites(userId: string, category?: string) {
     return this.repo.listUserFavorites(userId, category);
+  }
+
+  // User location
+  getUserLocation(userId: string) {
+    return this.repo.getUserLocation(userId);
+  }
+  upsertUserLocation(
+    userId: string,
+    data: Partial<{ lat: number | null; lng: number | null; closestAirportCode: string | null }>
+  ) {
+    return this.repo.upsertUserLocation(userId, data);
+  }
+
+  // User settings
+  getUserSettings(userId: string) {
+    return this.repo.getUserSettings(userId);
+  }
+  upsertUserSettings(
+    userId: string,
+    data: Partial<{ chatAudience: string | null; pushEnabled: boolean | null }>
+  ) {
+    return this.repo.upsertUserSettings(userId, data);
   }
 }

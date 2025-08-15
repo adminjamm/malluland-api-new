@@ -13,7 +13,7 @@ export class MeetupsRepository {
     return Container.get('db');
   }
 
-  listInRange({ range, limit, offset, onlyActive = true, city, activityId }: { range: TimeRange; limit: number; offset: number; onlyActive?: boolean; city?: string; activityId?: number }) {
+  listInRange({ range, limit, offset, onlyActive = true, city, activityId, excludeHostId }: { range: TimeRange; limit: number; offset: number; onlyActive?: boolean; city?: string; activityId?: number; excludeHostId?: string }) {
     const where: any[] = [];
     if (onlyActive) where.push(eq(meetups.meetupStatus, 'active'));
     if (range.start && range.end) where.push(between(meetups.startsAt, range.start, range.end));
@@ -21,6 +21,7 @@ export class MeetupsRepository {
     else if (range.end) where.push(lt(meetups.startsAt, range.end));
     if (city) where.push(eq(meetups.city, city));
     if (activityId) where.push(eq(meetups.activityId, activityId));
+    if (excludeHostId) where.push(ne(meetups.hostId, excludeHostId));
 
     return this.db
       .select({
@@ -110,6 +111,11 @@ export class MeetupsRepository {
 
   addAttendee(meetupId: string, senderUserId: string) {
     const row = { id: crypto.randomUUID(), meetupId, senderUserId, chatRoomId: crypto.randomUUID(), createdAt: new Date(), updatedAt: new Date() } as any;
+    return this.db.insert(meetupAttendees).values(row).returning();
+  }
+
+  addAttendeeWithChatRoomId(meetupId: string, senderUserId: string, chatRoomId: string) {
+    const row = { id: crypto.randomUUID(), meetupId, senderUserId, chatRoomId, createdAt: new Date(), updatedAt: new Date() } as any;
     return this.db.insert(meetupAttendees).values(row).returning();
   }
 

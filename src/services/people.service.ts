@@ -25,8 +25,8 @@ export class PeopleService {
     this.repo = Container.get(PeopleRepository);
   }
 
-  async getPeople(params: { viewerId: string; page: number; center?: Center }): Promise<{ items: Array<{ id: string; avatar: string | null; name: string | null; age: number | null; bioSnippet: string | null }> }> {
-    const { viewerId, page, center } = params;
+  async getPeople(params: { viewerId: string; page: number; center?: Center; gender?: 'all' | 'male' | 'female' | 'other'; ageMin?: number; ageMax?: number; interestIds?: number[]; maxDistanceKm?: number }): Promise<{ items: Array<{ id: string; avatar: string | null; name: string | null; age: number | null; bioSnippet: string | null }> }> {
+    const { viewerId, page, center, gender = 'all', ageMin, ageMax, interestIds, maxDistanceKm } = params;
     const pageSize = 20;
 
     // Determine center
@@ -40,28 +40,37 @@ export class PeopleService {
     const maleOffset = (page - 1) * 10;
     const femaleOffset = (page - 1) * 10;
 
-    const [males, females] = await Promise.all([
-      this.repo.fetchGenderBucket({ viewerId, gender: 'male', center: ctr!, limit: 10, offset: maleOffset }),
-      this.repo.fetchGenderBucket({ viewerId, gender: 'female', center: ctr!, limit: 10, offset: femaleOffset }),
-    ]);
+    let combined: PersonRow[] = [];
 
-    let combined: PersonRow[] = [...males, ...females];
+    const distance = maxDistanceKm ?? 30;
 
-    // Backfill if one side has fewer than 10
-    if (males.length < 10) {
-      const deficit = 10 - males.length;
-      if (deficit > 0) {
-        const extraFemales = await this.repo.fetchGenderBucket({ viewerId, gender: 'female', center: ctr!, limit: deficit, offset: femaleOffset + 10 });
-        combined = [...males, ...females, ...extraFemales];
+    if (gender && gender !== 'all') {
+      // Single gender query with limit 20
+      combined = await this.repo.fetchGenderBucket({ viewerId, gender, center: ctr!, limit: 20, offset: (page - 1) * 20, maxDistanceKm: distance, ageMin, ageMax, interestIds });
+    } else {
+      const [males, females] = await Promise.all([
+        this.repo.fetchGenderBucket({ viewerId, gender: 'male', center: ctr!, limit: 10, offset: maleOffset, maxDistanceKm: distance, ageMin, ageMax, interestIds }),
+        this.repo.fetchGenderBucket({ viewerId, gender: 'female', center: ctr!, limit: 10, offset: femaleOffset, maxDistanceKm: distance, ageMin, ageMax, interestIds }),
+      ]);
+      combined = [...males, ...females];
+
+      // Backfill if one side has fewer than 10
+      if (males.length < 10) {
+        const deficit = 10 - males.length;
+        if (deficit > 0) {
+          const extraFemales = await this.repo.fetchGenderBucket({ viewerId, gender: 'female', center: ctr!, limit: deficit, offset: femaleOffset + 10, maxDistanceKm: distance, ageMin, ageMax, interestIds });
+          combined = [...males, ...females, ...extraFemales];
+        }
+      }
+      if (females.length < 10) {
+        const deficit = 10 - females.length;
+        if (deficit > 0) {
+          const extraMales = await this.repo.fetchGenderBucket({ viewerId, gender: 'male', center: ctr!, limit: deficit, offset: maleOffset + 10, maxDistanceKm: distance, ageMin, ageMax, interestIds });
+          combined = [...males, ...females, ...combined, ...extraMales];
+        }
       }
     }
-    if (females.length < 10) {
-      const deficit = 10 - females.length;
-      if (deficit > 0) {
-        const extraMales = await this.repo.fetchGenderBucket({ viewerId, gender: 'male', center: ctr!, limit: deficit, offset: maleOffset + 10 });
-        combined = [...males, ...females, ...combined, ...extraMales];
-      }
-    }
+
 
     // Sort by approval_at desc (nulls last)
     combined.sort((a, b) => {

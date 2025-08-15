@@ -1,0 +1,29 @@
+meta {
+  name: Users: Update location
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{endpoint}}/users/location
+  body: json
+  auth: inherit
+}
+
+headers {
+  content-type: application/json
+  x-user-id: {{userId}}
+}
+
+body:json {
+  {
+    "lat": 12.9716,
+    "lng": 77.5946,
+    "closestAirportCode": null
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+

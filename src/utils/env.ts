@@ -17,10 +17,12 @@ const schema = z.object({
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_REDIECT_URL: z.string(),
   // AWS S3
-  AWS_REGION: z.string(),
-  AWS_ACCESS_KEY_ID: z.string(),
-  AWS_SECRET_ACCESS_KEY: z.string(),
-  S3_BUCKET: z.string(),
+  AWS_REGION: z.string().optional(),
+  AWS_ACCESS_KEY_ID: z.string().optional(),
+  AWS_SECRET_ACCESS_KEY: z.string().optional(),
+  S3_BUCKET: z.string().optional(),
+  // LocationIQ
+  LOCATIONIQ_API_KEY: z.string().optional(),
 });
 
 const parsed = schema.parse({
@@ -40,6 +42,7 @@ const parsed = schema.parse({
   AWS_ACCESS_KEY_ID: process.env.AWS_BUCKET_ACCESS_KEY,
   AWS_SECRET_ACCESS_KEY: process.env.AWS_BUCKET_SECRET_KEY,
   S3_BUCKET: process.env.AWS_BUCKET_NAME,
+  LOCATIONIQ_API_KEY: process.env.LOCATIONIQ_API_KEY,
 });
 
 export const env = {
