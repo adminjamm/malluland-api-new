@@ -1,11 +1,11 @@
 meta {
-  name: Meetups: List all
+  name: Users: Get settings
   type: http
   seq: 1
 }
 
 get {
-  url: {{endpoint}}/meetups?page=1
+  url: {{endpoint}}/users/settings
   body: none
   auth: inherit
 }

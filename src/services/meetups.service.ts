@@ -1,11 +1,20 @@
 import { Service, Container } from 'typedi';
 import { MeetupsRepository } from '../repositories/meetups.repository';
+import { FirebaseHelper } from '../third-party-services/firebase.helper';
+import { ChatRepository } from '../repositories/chat.repository';
+import { UsersRepository } from '../repositories/users.repository';
 
 @Service()
 export class MeetupsService {
   private readonly repo: MeetupsRepository;
+  private readonly firebase: FirebaseHelper;
+  private readonly chatRepo: ChatRepository;
+  private readonly usersRepo: UsersRepository;
   constructor() {
     this.repo = Container.get(MeetupsRepository);
+    this.firebase = Container.get(FirebaseHelper);
+    this.chatRepo = Container.get(ChatRepository);
+    this.usersRepo = Container.get(UsersRepository);
   }
 
   private nowIST(): Date {
@@ -44,7 +53,7 @@ export class MeetupsService {
     return { start: new Date(saturday.getTime() - offsetMs), end: new Date(sundayEnd.getTime() - offsetMs) };
   }
 
-  getDiscovery({ filter, page, city, activityId }: { filter: 'upcoming' | 'this-week' | 'this-weekend'; page: number; city?: string; activityId?: number }) {
+  getDiscovery({ filter, page, city, activityId, excludeHostId }: { filter: 'upcoming' | 'this-week' | 'this-weekend'; page: number; city?: string; activityId?: number; excludeHostId?: string }) {
     const limit = 20;
     const offset = (page - 1) * limit;
     const now = this.nowIST();
@@ -52,7 +61,7 @@ export class MeetupsService {
     if (filter === 'this-week') range = this.weekRangeIST(now);
     else if (filter === 'this-weekend') range = this.weekendRangeIST(now);
     else range = { start: now };
-    return this.repo.listInRange({ range, limit, offset, onlyActive: true, city, activityId });
+    return this.repo.listInRange({ range, limit, offset, onlyActive: true, city, activityId, excludeHostId });
   }
 
   getMyMeetups({ userId, page, includePast }: { userId: string; page: number; includePast?: boolean }) {
@@ -105,7 +114,54 @@ export class MeetupsService {
     if (!m || m.hostId !== hostId) throw new Error('Not authorized');
     if (action === 'accept') {
       const updated = await this.repo.approveRequest(id);
-      await this.repo.addAttendee(req.meetupId, req.senderUserId);
+
+      // Check for existing chat room between host and requester for this meetup
+      const existing = await this.chatRepo.findMeetupRoomByParticipants(req.meetupId, hostId, req.senderUserId);
+
+      let roomId: string;
+      if (existing) {
+        roomId = existing.id;
+
+        // Ensure first message exists; if room has no messages and request had a message, seed it
+        if (req.message && req.message.trim().length > 0) {
+          const hasMessages = await this.chatRepo.hasAnyMessages(roomId);
+          if (!hasMessages) {
+            // Let Firebase generate the message ID, then persist the same ID in DB
+            const [sender] = await this.usersRepo.getById(req.senderUserId);
+            const senderName = sender?.name ?? null;
+            const messageId = await this.firebase.addChatMessage({ chatId: roomId, senderUserId: req.senderUserId, senderName, kind: 'text', body: req.message, createdAt: Date.now() });
+            await this.chatRepo.createTextMessage({ id: messageId, chatId: roomId, senderUserId: req.senderUserId, body: req.message });
+          }
+        }
+      } else {
+        // Create chat room: Firebase RTDB + DB chat_rooms
+        roomId = crypto.randomUUID();
+
+        await this.firebase.createChatRoom({
+          id: roomId,
+          type: 'meetup',
+          meetupId: req.meetupId,
+          participants: [hostId, req.senderUserId],
+          createdAt: Date.now(),
+        });
+
+        await this.chatRepo.createChatRoom({ id: roomId, type: 'meetup', meetupId: req.meetupId });
+
+        // Add both host and requester as participants
+        await this.chatRepo.addParticipants(roomId, [hostId, req.senderUserId]);
+
+        // Seed the first chat message from the original request message, if present
+        if (req.message && req.message.trim().length > 0) {
+          // Let Firebase generate the message ID, then persist the same ID in DB
+          const [sender] = await this.usersRepo.getById(req.senderUserId);
+          const senderName = sender?.name ?? null;
+          const messageId = await this.firebase.addChatMessage({ chatId: roomId, senderUserId: req.senderUserId, senderName, kind: 'text', body: req.message, createdAt: Date.now() });
+          await this.chatRepo.createTextMessage({ id: messageId, chatId: roomId, senderUserId: req.senderUserId, body: req.message });
+        }
+      }
+
+      await this.repo.addAttendeeWithChatRoomId(req.meetupId, req.senderUserId, roomId);
+
       return updated;
     } else {
       return this.repo.declineRequest(id);

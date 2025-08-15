@@ -11,6 +11,8 @@ import { usersRouter } from "./routes/users";
 import { actorsRouter } from "./routes/actors";
 import { requestsRouter } from "./routes/requests";
 import { storageRouter } from "./routes/storage";
+import { airportsRouter } from "./routes/airports";
+import { chatsRouter } from "./routes/chats";
 // import { createDb } from "./infra/db";
 import { env } from "./utils/env";
 import { authRouter } from "./routes/auth";
@@ -33,6 +35,8 @@ app.route("/users", usersRouter);
 app.route("/actors", actorsRouter);
 app.route("/requests", requestsRouter);
 app.route("/storage", storageRouter);
+app.route("/airports", airportsRouter);
+app.route("/chats", chatsRouter);
 
 const port = env.PORT ?? 8787;
 console.log(`Server listening on http://localhost:${port}`);

@@ -31,8 +31,10 @@ export class PeopleRepository {
   }
 
   async getViewerCenter(userId: string): Promise<Center | null> {
+    // Fetch the latest lat/lng for the user from user_location.
+    // Although user_id is modeled as PK (single row), we still order by updated_at DESC for safety.
     const rows = await this.db.execute(
-      sql`SELECT lat, lng FROM user_location WHERE user_id = ${userId} LIMIT 1`
+      sql`SELECT lat, lng FROM user_location WHERE user_id = ${userId} ORDER BY updated_at DESC NULLS LAST LIMIT 1`
     );
     const r: any = Array.isArray(rows) ? (rows as any)[0] : (rows as any).rows?.[0];
     if (!r) return null;
@@ -42,16 +44,20 @@ export class PeopleRepository {
   // Fetch a gender bucket, ordered by approval_at desc, filtered within 30km and not blocked.
   async fetchGenderBucket(params: {
     viewerId: string;
-    gender: Gender;
+    gender?: Gender; // if omitted, no gender filter
     center: Center;
     limit: number;
     offset: number;
+    maxDistanceKm?: number;
+    ageMin?: number;
+    ageMax?: number;
+    interestIds?: number[];
   }): Promise<PersonRow[]> {
-    const { viewerId, gender, center, limit, offset } = params;
+    const { viewerId, gender, center, limit, offset, maxDistanceKm = 30, ageMin, ageMax, interestIds } = params;
 
-    // 30km bounding box deltas
-    const latDelta = 30 / 111.32;
-    const lngDelta = 30 / (111.32 * Math.cos((center.lat * Math.PI) / 180));
+    // Bounding box deltas based on radius
+    const latDelta = maxDistanceKm / 111.32;
+    const lngDelta = maxDistanceKm / (111.32 * Math.cos((center.lat * Math.PI) / 180));
 
     const query = sql`
       WITH latest_approval AS (
@@ -89,7 +95,7 @@ export class PeopleRepository {
       ) avatar ON true
       WHERE u.id <> ${viewerId}
         AND u.user_state IN ('approved_free', 'approved_paid')
-        AND u.gender = ${gender}
+        ${gender ? sql`AND u.gender = ${gender}` : sql``}
         AND ul.lat BETWEEN ${center.lat - latDelta} AND ${center.lat + latDelta}
         AND ul.lng BETWEEN ${center.lng - lngDelta} AND ${center.lng + lngDelta}
         AND NOT EXISTS (
@@ -97,11 +103,14 @@ export class PeopleRepository {
           WHERE (bu.user_id = ${viewerId} AND bu.blocked_user_id = u.id)
              OR (bu.user_id = u.id AND bu.blocked_user_id = ${viewerId})
         )
+        ${interestIds && interestIds.length ? sql`AND EXISTS (SELECT 1 FROM user_interests ui WHERE ui.user_id = u.id AND ui.interest_id IN (${sql.join(interestIds.map((id) => sql`${id}`), sql`, `)}))` : sql``}
+        ${typeof ageMin === 'number' ? sql`AND (DATE_PART('year', AGE(CURRENT_DATE, u.dob)) >= ${ageMin})` : sql``}
+        ${typeof ageMax === 'number' ? sql`AND (DATE_PART('year', AGE(CURRENT_DATE, u.dob)) <= ${ageMax})` : sql``}
         AND (6371 * acos(
                cos(radians(${center.lat})) * cos(radians(ul.lat)) *
                cos(radians(ul.lng) - radians(${center.lng})) +
                sin(radians(${center.lat})) * sin(radians(ul.lat))
-             )) <= 30
+             )) <= ${maxDistanceKm}
       ORDER BY la.approval_at DESC NULLS LAST, u.updated_at DESC NULLS LAST, u.id
       LIMIT ${limit} OFFSET ${offset}
     `;

@@ -19,7 +19,8 @@ meetupsRouter.get(
   })),
   async (c) => {
     const { page = '1', filter = 'upcoming', city, activityId } = c.req.valid('query');
-    const items = await svc().getDiscovery({ filter, page: Number(page), city, activityId: activityId ? Number(activityId) : undefined });
+    const userId = c.req.header('x-user-id') || undefined;
+    const items = await svc().getDiscovery({ filter, page: Number(page), city, activityId: activityId ? Number(activityId) : undefined, excludeHostId: userId });
     return c.json({ page: Number(page), pageSize: 20, items });
   }
 );
@@ -41,14 +42,14 @@ meetupsRouter.get(
 meetupsRouter.post(
   '/',
   zValidator('json', z.object({
-    name: z.string().min(10).max(35),
+    name: z.string().max(35),
     activityId: z.number().int(),
     guests: z.number().int().min(1).max(7),
     whoPays: z.string(),
     currencyCode: z.string(),
     feeAmount: z.string(),
     locationText: z.string().max(100),
-    description: z.string().min(35).max(150),
+    description: z.string().max(150),
     startsAt: z.string(),
     endsAt: z.string(),
     mapUrl: z.string().url().nullable().optional(),

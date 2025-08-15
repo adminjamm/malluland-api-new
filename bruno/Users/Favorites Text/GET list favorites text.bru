@@ -1,13 +1,17 @@
 meta {
-  name: Requests: List all
+  name: Users: List favorites text
   type: http
   seq: 1
 }
 
 get {
-  url: {{endpoint}}/requests?filter=all&page=1
+  url: {{endpoint}}/users/user-favorites?category=movies
   body: none
   auth: inherit
+}
+
+params:query {
+  category: movies
 }
 
 headers {

@@ -12,6 +12,7 @@ requestsRouter.get(
   async (c) => {
     const { page = '1', filter } = c.req.valid('query');
     const userId = c.req.header('x-user-id');
+    console.log('requestsRouter.get', { page, filter, userId });
     if (!userId) return c.json({ error: 'x-user-id header required' }, 400);
     const items = await Container.get(RequestsService).list({ userId, filter, page: Number(page) });
     return c.json({ page: Number(page), pageSize: 21, items });

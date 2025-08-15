@@ -1,17 +1,29 @@
 meta {
-  name: People: Discover
+  name: People: Discover (with filters)
   type: http
   seq: 1
 }
 
 get {
-  url: {{endpoint}}/people?page=1
+  url: {{endpoint}}/people?page=1&ageMin=18&ageMax=32
   body: none
   auth: inherit
 }
 
+params:query {
+  page: 1
+  ageMin: 18
+  ageMax: 32
+  ~gender: all
+  ~interests: 
+  ~radiusKm: 
+  ~under15: true
+  ~lat: 
+  ~lng: 
+}
+
 headers {
-  x-user-id: aeaf574f-eb87-4609-80c0-12ac2b8db281
+  x-user-id: 62b28d3c-0fa1-4471-8b25-c249b504d284
 }
 
 settings {

@@ -79,7 +79,7 @@ Key: `user_id`, `actress_id` (PK composite), `position`.
 
 **20\. user\_favorites\_text**
 Purpose: Free-text favorites (up to 5 each item type).
-Key: `id`, `user_id`, `category` (musician | movie | game\_sport | dish), `text` (≤150), `position`, `created_at`.
+Key: `id`, `user_id`, `category` (musician | movie | game\_sport | dish | places | books), `text` (≤150), `position`, `created_at`.
 
 **21\. bookmarks**
 Purpose: Users bookmarked by a user (lifetime cap = 7 enforced in logic).
