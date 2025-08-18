@@ -26,10 +26,10 @@ People
 Meetups
 - GET /meetups
   - Query: page (default 1)
-  - Response: 200 { page, pageSize: 20, items }
+  - Response: 200 { page, pageSize: 20, items: [{ id, name, startsAt, endsAt, city, state, country, activityId, whoPays, feeAmount, guests, hostId, hostName, hostAvatar }] }
 
 - GET /meetups?filter=this-week|this-weekend|upcoming&city&activityId
-  - Response: 200 { page, pageSize: 20, items }
+  - Response: 200 { page, pageSize: 20, items: [{ id, name, startsAt, endsAt, city, state, country, activityId, whoPays, feeAmount, guests, hostId, hostName, hostAvatar }] }
 
 - GET /meetups/me
   - Headers: x-user-id
@@ -98,6 +98,15 @@ Bookmarks
   - Response: 200 { ok: true }
 
 ## Requests
+
+- POST /requests/chats
+  - Headers: x-user-id
+  - Body: { toUserId: uuid, message: string (<= 500) }
+  - Response: 201 <created chat_request row>
+
+- GET /requests/chats?page=1
+  - Headers: x-user-id
+  - Response: 200 { page, pageSize: 21, items }
 
 ### GET /chats/rooms
 List chat rooms for the authenticated user. Includes unread counts, last message metadata, and participant user IDs.

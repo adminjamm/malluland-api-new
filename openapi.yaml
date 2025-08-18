@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: "3.1.0"
 info:
   title: Malluland API
   version: "1.0.0"
@@ -118,6 +118,21 @@ paths:
                     type: array
                     items:
                       type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        name: { type: string }
+                        startsAt: { type: string, format: date-time }
+                        endsAt: { type: string, format: date-time, nullable: true }
+                        city: { type: string, nullable: true }
+                        state: { type: string, nullable: true }
+                        country: { type: string, nullable: true }
+                        activityId: { type: integer }
+                        whoPays: { type: string, nullable: true }
+                        feeAmount: { type: string, nullable: true }
+                        guests: { type: integer }
+                        hostId: { type: string, format: uuid }
+                        hostName: { type: string, nullable: true }
+                        hostAvatar: { type: string, nullable: true }
     post:
       summary: Create a meetup
       security:
@@ -342,6 +357,52 @@ paths:
   /requests:
     get:
       summary: List requests for the authenticated user
+      security:
+        - XUserId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [all, meetups, chats]
+            default: all
+      responses:
+        '200':
+          description: Requests
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+
+  /requests/chats:
+    post:
+      summary: Create a chat request
+      security:
+        - XUserId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [toUserId, message]
+              properties:
+                toUserId: { type: string, format: uuid }
+                message: { type: string, maxLength: 500 }
+      responses:
+        '201': { description: Created }
+    get:
+      summary: List chat requests sent by the authenticated user
+      security:
+        - XUserId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200': { description: Sent chat requests, content: { application/json: { schema: { type: object } } } }
 
   /chats/rooms:
     get:
@@ -408,14 +469,6 @@ paths:
           description: Unauthorized
       security:
         - XUserId: []
-      parameters:
-        - $ref: '#/components/parameters/PageParam'
-        - name: filter
-          in: query
-          required: false
-          schema: { type: string, enum: [all, meetups, chats], default: all }
-      responses:
-        '200': { description: Requests, content: { application/json: { schema: { type: object } } } }
   /requests/chats/{id}/accept:
     post:
       summary: Accept chat request

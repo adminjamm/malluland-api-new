@@ -10,15 +10,16 @@ post {
   auth: inherit
 }
 
-body:json {
-  message: "Hey, would love to join!"
-}
-
 headers {
   x-user-id: {{userId}}
+}
+
+body:json {
+  {
+    "message": "Requested to join!"
+  }
 }
 
 settings {
   encodeUrl: true
 }
-

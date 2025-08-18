@@ -20,7 +20,7 @@ meetupsRouter.get(
   async (c) => {
     const { page = '1', filter = 'upcoming', city, activityId } = c.req.valid('query');
     const userId = c.req.header('x-user-id') || undefined;
-    const items = await svc().getDiscovery({ filter, page: Number(page), city, activityId: activityId ? Number(activityId) : undefined, excludeHostId: userId });
+    const items = await svc().getDiscovery({ filter, page: Number(page), city, activityId: activityId ? Number(activityId) : undefined, excludeHostId: userId, requestUserId: userId });
     return c.json({ page: Number(page), pageSize: 20, items });
   }
 );
@@ -121,13 +121,16 @@ meetupsRouter.post(
   '/:id/requests',
   zValidator('json', z.object({ message: z.string().max(500) })),
   async (c) => {
+    console.log("Request to join meetup");
     const userId = c.req.header('x-user-id');
     if (!userId) return c.json({ error: 'x-user-id header required' }, 400);
     const id = c.req.param('id');
+    console.log("Meetup ID:", id);
     try {
       const row = await svc().requestToJoin(id, userId, c.req.valid('json').message);
       return c.json(row[0], 201);
     } catch (e) {
+      console.error("Error requesting to join meetup:", e);
       return c.json({ error: (e as Error).message }, 400);
     }
   }
@@ -160,6 +163,7 @@ meetupsRouter.post('/requests/:id/approve', async (c) => {
     const row = await svc().judgeRequest(id, userId, 'accept');
     return c.json(row[0]);
   } catch (e) {
+    console.error('Error approving meetup request:', e);
     return c.json({ error: (e as Error).message }, 400);
   }
 });

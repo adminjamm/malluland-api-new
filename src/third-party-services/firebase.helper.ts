@@ -45,11 +45,17 @@ function getOrInitFirebaseApp(): App {
   });
 }
 
+export type FirebaseParticipant = {
+  userId: string;
+  isAdmin?: boolean;
+  joinedAt?: number; // ms epoch
+};
+
 export type FirebaseChatRoomPayload = {
   id: string;
   type: 'meetup' | 'DM';
   meetupId?: string | null;
-  participants?: string[]; // userIds
+  participants?: FirebaseParticipant[]; // richer participant metadata
   createdAt: number; // ms epoch
   // any additional metadata can be added later
 };
@@ -77,24 +83,45 @@ export class FirebaseHelper {
     try {
       console.log('Creating chat room in Firebase:', payload);
       const db = this.getRTDB();
-      const ref = db.ref(`/chatRooms/${payload.id}`);
-      return await ref.set({
+      const roomRef = db.ref(`/chatRooms/${payload.id}`);
+
+      // Base room metadata
+      const base = {
         type: payload.type,
         meetupId: payload.meetupId ?? null,
-        participants: payload.participants ?? [],
         createdAt: payload.createdAt,
-      });
+      } as const;
+
+      await roomRef.set(base);
+
+      // Write participants under the room with metadata. If none given, default to empty object
+      const participants = payload.participants ?? [];
+      if (participants.length > 0) {
+        const participantsObj = participants.reduce<Record<string, { isAdmin: boolean; joinedAt: number }>>((acc, p) => {
+          acc[p.userId] = {
+            isAdmin: !!p.isAdmin,
+            joinedAt: p.joinedAt ?? Date.now(),
+          };
+          return acc;
+        }, {});
+        await roomRef.child('participants').set(participantsObj);
+      } else {
+        await roomRef.child('participants').set({});
+      }
+
+      return true;
     } catch (error) {
       console.error('Error creating chat room in Firebase:', error);
       throw new Error('Failed to create chat room in Firebase');
     }
   }
 
-  // Adds a chat message letting Firebase generate the message ID via push().
+  // Adds a chat message under chatRooms/{chatId}/messages letting Firebase generate the message ID via push().
   // Returns the generated message ID (string).
   async addChatMessage(msg: FirebaseChatMessagePayload): Promise<string> {
+    try{
     const db = this.getRTDB();
-    const listRef = db.ref(`/messages/${msg.chatId}`);
+    const listRef = db.ref(`/chatRooms/${msg.chatId}/messages`);
     const newRef = listRef.push();
     await newRef.set({
       senderUserId: msg.senderUserId,
@@ -107,5 +134,9 @@ export class FirebaseHelper {
       throw new Error('Failed to obtain Firebase message ID');
     }
     return newRef.key;
+  } catch (error) {
+      console.error('Error adding chat message in Firebase:', error);
+      throw new Error('Failed to add chat message in Firebase');
+    }
   }
 }

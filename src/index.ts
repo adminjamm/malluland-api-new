@@ -48,7 +48,7 @@ app.get("/openapi.yaml", async () => {
   const p = path.resolve(process.cwd(), "openapi.yaml");
   const yaml = fs.readFileSync(p, "utf-8");
   return new Response(yaml, {
-    headers: { "content-type": "text/yaml; charset=utf-8" },
+    headers: { "content-type": "application/yaml; charset=utf-8" },
   });
 });
 

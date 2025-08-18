@@ -12,6 +12,17 @@ export const usersRouter = new Hono();
 
 const svc = () => Container.get(UsersService);
 
+function computeAgeFromDob(dob: unknown): number | null {
+  if (!dob) return null;
+  const d = new Date(dob as any);
+  if (isNaN(d.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - d.getFullYear();
+  const m = today.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+  return age;
+}
+
 // User profile
 usersRouter.get(
   "/me",
@@ -19,6 +30,7 @@ usersRouter.get(
   async (c) => {
     const userId = c.req.header('x-user-id');
 
+    console.log("[users] GET /me - userId:", userId);
     const [
       [user],
       photos,
@@ -77,6 +89,7 @@ usersRouter.get(
 
     const profileData = {
       ...user,
+      age: computeAgeFromDob((user as any).dob ?? null),
       photos: profilePhotos,
       avatar,
       selfies,

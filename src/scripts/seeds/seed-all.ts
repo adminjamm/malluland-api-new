@@ -26,6 +26,14 @@ async function main() {
   await seedAppSettings();
   await seedUsers();
 
+  // Populate DOBs for existing users (18-55)
+  try {
+    const { seedUsersDob } = await import('./usersDob');
+    await seedUsersDob();
+  } catch (e) {
+    console.warn('[seed:usersDob] Skipping DOB seeding:', (e as Error).message);
+  }
+
   // Seed user locations so People API works without explicit lat/lng
   try {
     const { seedUserLocation } = await import('./userLocation');
@@ -57,6 +65,14 @@ async function main() {
   await runMeetupRequests();
   const { run: runMeetupAttendees } = await import('./meetupAttendees');
   await runMeetupAttendees();
+
+  // Seed chat requests (idempotent)
+  try {
+    const { run: runChatRequests } = await import('./chatRequests');
+    await runChatRequests();
+  } catch (e) {
+    console.warn('[seed:chat_requests] Skipping chat requests seeding:', (e as Error).message);
+  }
 
   // Seed bookmarks (idempotent)
   try {
