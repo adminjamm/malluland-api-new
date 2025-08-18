@@ -65,10 +65,10 @@ export const authorize = ({
 } = {}) => {
   return createMiddleware<AuthVariables>(async (c, next) => {
     // Check if auth token exists
-    if(bypassOnboardingCheck) {
-      return next();
-    }
-    
+    // if(bypassOnboardingCheck) {
+    //   return next();
+    // }
+
     const authToken = c.req.header("Authorization");
     if (!authToken) {
       return c.json({ message: "Unauthorized" }, 401);
