@@ -11,4 +11,10 @@ export class ChatsService {
     const offset = (page - 1) * limit;
     return this.repo.listRoomsForUser(userId, limit, offset);
   }
+
+  listRoomsV2(userId: string, page: number, pageSize = 20): Promise<any[]> {
+    const limit = pageSize;
+    const offset = (page - 1) * limit;
+    return this.repo.listRoomsV2(userId, limit, offset);
+  }
 }

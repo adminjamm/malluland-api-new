@@ -79,6 +79,19 @@ export class FirebaseHelper {
     return getDatabase(this.app);
   }
 
+  async roomExists(chatId: string): Promise<boolean> {
+    try {
+      const db = this.getRTDB();
+      const roomRef = db.ref(`/chatRooms/${chatId}`);
+      const snap = await roomRef.get();
+      return snap.exists();
+    } catch (error) {
+      console.error('Error checking Firebase room existence:', error);
+      // If there's an error, assume not exists to allow creation on acceptance.
+      return false;
+    }
+  }
+
   async createChatRoom(payload: FirebaseChatRoomPayload) {
     try {
       console.log('Creating chat room in Firebase:', payload);
@@ -113,6 +126,23 @@ export class FirebaseHelper {
     } catch (error) {
       console.error('Error creating chat room in Firebase:', error);
       throw new Error('Failed to create chat room in Firebase');
+    }
+  }
+
+  // Adds or updates participants under chatRooms/{chatId}/participants without overwriting the entire list.
+  async addParticipants(chatId: string, participants: FirebaseParticipant[]) {
+    try {
+      if (!participants || participants.length === 0) return true;
+      const db = this.getRTDB();
+      const updates: Record<string, { isAdmin: boolean; joinedAt: number }> = {};
+      for (const p of participants) {
+        updates[p.userId] = { isAdmin: !!p.isAdmin, joinedAt: p.joinedAt ?? Date.now() };
+      }
+      await db.ref(`/chatRooms/${chatId}/participants`).update(updates);
+      return true;
+    } catch (error) {
+      console.error('Error adding participants in Firebase:', error);
+      throw new Error('Failed to add participants in Firebase');
     }
   }
 

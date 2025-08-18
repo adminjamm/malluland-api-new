@@ -57,6 +57,13 @@ export class ChatRepository {
     return rows && rows.length ? { id: rows[0].id as string } : null;
   }
 
+  async findMeetupRoomByMeetupId(meetupId: string): Promise<{ id: string } | null> {
+    const q = sql`SELECT cr.id FROM chat_rooms cr WHERE cr.meetup_id = ${meetupId} ORDER BY cr.created_at ASC LIMIT 1`;
+    const res: any = await this.db.execute(q);
+    const rows = Array.isArray(res) ? res : res.rows;
+    return rows && rows.length ? { id: rows[0].id as string } : null;
+  }
+
   async findDmRoomByParticipants(userA: string, userB: string): Promise<{ id: string } | null> {
     // DM rooms are those with type = 'DM' and meetup_id IS NULL
     const q = sql`SELECT cr.id

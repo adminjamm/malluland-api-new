@@ -109,8 +109,8 @@ export class MeetupsRepository {
     return this.db.execute(query) as any;
   }
 
-  create(hostId: string, data: Omit<typeof meetups.$inferInsert, 'id' | 'hostId' | 'createdAt' | 'updatedAt'>) {
-    const row = { ...(data as any), hostId, id: crypto.randomUUID(), createdAt: new Date(), updatedAt: new Date(), meetupStatus: 'active' } as any;
+  create(hostId: string, data: Omit<typeof meetups.$inferInsert, 'id' | 'hostId' | 'createdAt' | 'updatedAt' | 'chatRoomId'>, chatRoomId?: string) {
+    const row = { ...(data as any), hostId, chatRoomId: chatRoomId ?? null, id: crypto.randomUUID(), createdAt: new Date(), updatedAt: new Date(), meetupStatus: 'active' } as any;
     return this.db.insert(meetups).values(row).returning();
   }
 
@@ -124,6 +124,48 @@ export class MeetupsRepository {
 
   getById(id: string) {
     return this.db.select().from(meetups).where(eq(meetups.id, id)).limit(1);
+  }
+
+  getDetailsById(id: string, requestUserId?: string) {
+    const isRequestedExpr = requestUserId
+      ? sql`EXISTS (SELECT 1 FROM meetup_requests mr WHERE mr.meetup_id = m.id AND mr.sender_user_id = ${requestUserId}::uuid)`
+      : sql`false`;
+
+    const query = sql`
+      SELECT
+        m.id,
+        m.name,
+        m.starts_at AS "startsAt",
+        m.ends_at AS "endsAt",
+        m.city,
+        m.state,
+        m.country,
+        m.activity_id AS "activityId",
+        m.who_pays AS "whoPays",
+        m.fee_amount AS "feeAmount",
+        m.guests,
+        m.host_id AS "hostId",
+        u.name AS "hostName",
+        COALESCE(avatar.optimized_url, avatar.original_url) AS "hostAvatar",
+        m.location_text AS "locationText",
+        m.description,
+        m.map_url AS "mapUrl",
+        m.meetup_status AS "meetupStatus",
+        ${isRequestedExpr} AS "isRequested"
+      FROM meetups m
+      INNER JOIN users u ON u.id = m.host_id
+      LEFT JOIN LATERAL (
+        SELECT up.optimized_url, up.original_url
+        FROM user_photos up
+        WHERE up.user_id = u.id AND up.image_type = 'avatar' AND up.is_active = true
+        ORDER BY up.position ASC
+        LIMIT 1
+      ) avatar ON true
+      WHERE m.id = ${id}
+      LIMIT 1
+    `;
+
+    return this.db.execute(query) as any;
   }
 
   listAttendees(meetupId: string) {
@@ -158,6 +200,14 @@ export class MeetupsRepository {
 
   declineRequest(id: string) {
     return this.db.update(meetupRequests).set({ status: 'declined', updatedAt: new Date() } as any).where(eq(meetupRequests.id, id)).returning();
+  }
+
+  setRequestChatRoom(id: string, chatRoomId: string) {
+    return this.db
+      .update(meetupRequests)
+      .set({ chatRoomId, updatedAt: new Date() } as any)
+      .where(eq(meetupRequests.id, id))
+      .returning();
   }
 
   addAttendee(meetupId: string, senderUserId: string) {

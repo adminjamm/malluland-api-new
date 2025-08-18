@@ -36,6 +36,11 @@ Meetups
   - Query: page (default 1), includePast (true|false)
   - Response: 200 { page, pageSize: 20, items }
 
+- GET /meetups/:id
+  - Headers: x-user-id (optional)
+  - Response: 200 { id, name, startsAt, endsAt, city, state, country, activityId, whoPays, feeAmount, guests, hostId, hostName, hostAvatar, locationText, description, mapUrl, meetupStatus, isRequested }
+  - Errors: 404 if not found
+
 - POST /meetups
   - Headers: x-user-id
   - Body (json): { name, activityId, guests, whoPays, currencyCode, feeAmount, locationText, description, startsAt, endsAt, mapUrl?, city, state, country, lat?, lng? }
@@ -131,6 +136,20 @@ Response 200:
       "participant_user_ids": ["uuid", "uuid"]
     }
   ]
+}
+
+### GET /chats/v2/rooms
+Advanced room listing with filtering and joins. Only shows rooms where caller is an active participant, excludes single-user rooms, and excludes DMs where either participant has blocked the other. Includes optional DM requestor/creator names and meetup details for meetup rooms.
+
+Query params:
+- page (integer, default 1)
+- pageSize (integer, default 10, max 100)
+
+Response 200:
+{
+  "page": 1,
+  "pageSize": 10,
+  "items": [ { /* joined row per room */ } ]
 }
 - GET /requests
   - Headers: x-user-id

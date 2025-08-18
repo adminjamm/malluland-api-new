@@ -6,20 +6,22 @@ meta {
 
 post {
   url: {{endpoint}}/requests/chats
+  body: json
   auth: inherit
 }
 
-body:json {
-  toUserId: {{toUserId}}
-  message: "Hey! Let's chat?"
+headers {
+  x-user-id: d7c351f8-18a4-4840-ac6f-2f27103cd048
+  content-type: application/json
 }
 
-headers {
-  x-user-id: {{userId}}
-  content-type: application/json
+body:json {
+  {
+    "message": "Hey! Let's chat?",
+    "toUserId": "d9048a46-bafe-40b5-b419-7d25d431b1d6"
+  }
 }
 
 settings {
   encodeUrl: true
 }
-

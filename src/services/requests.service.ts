@@ -31,8 +31,29 @@ export class RequestsService {
     return this.repo.listChatSent(userId, limit, offset);
   }
 
-  createChatRequest(fromUserId: string, toUserId: string, message: string) {
-    return this.repo.createChatRequest(fromUserId, toUserId, message);
+  async createChatRequest(fromUserId: string, toUserId: string, message: string) {
+    // Insert the chat request first
+    const rows = await this.repo.createChatRequest(fromUserId, toUserId, message);
+    const req = rows[0];
+
+    // Ensure a DB DM chat room exists between the two users (no Firebase yet)
+    let roomId: string;
+    const existing = await this.chatRepo.findDmRoomByParticipants(fromUserId, toUserId);
+    if (existing) {
+      roomId = existing.id;
+    } else {
+      roomId = crypto.randomUUID();
+      await this.chatRepo.createChatRoom({ id: roomId, type: 'DM', meetupId: null });
+      await this.chatRepo.addParticipants(roomId, [fromUserId, toUserId]);
+    }
+
+    // Link the room to the chat request
+    await this.repo.setChatRequestRoom(req.id, roomId);
+
+    // Return the updated request row
+    const res: any = await this.repo.getChatRequestById(req.id);
+    const updated = Array.isArray(res) ? res[0] : (res as any).rows?.[0];
+    return [updated] as any;
   }
 
   async judgeChat(id: string, toUserId: string, action: 'accept' | 'decline' | 'archive') {
@@ -44,36 +65,35 @@ export class RequestsService {
     if (req.to_user_id !== toUserId) throw new Error('Not authorized');
 
     if (action === 'accept') {
-      // Create DM room (even if a meetup room exists with same participants). If a DM room exists, reuse it.
+      // Ensure DM room exists (DB only); reuse if present
       let roomId: string;
       const existing = await this.chatRepo.findDmRoomByParticipants(req.from_user_id, req.to_user_id);
       if (existing) {
         roomId = existing.id;
       } else {
         roomId = crypto.randomUUID();
-        await this.firebase.createChatRoom({
-          id: roomId,
-          type: 'DM',
-          meetupId: null,
-          participants: [
-            { userId: req.from_user_id, isAdmin: false },
-            { userId: req.to_user_id, isAdmin: false },
-          ],
-          createdAt: Date.now(),
-        });
         await this.chatRepo.createChatRoom({ id: roomId, type: 'DM', meetupId: null });
         await this.chatRepo.addParticipants(roomId, [req.from_user_id, req.to_user_id]);
+      }
 
-        // Seed first message from original request, only if no messages
-        if (req.message && String(req.message).trim().length > 0) {
-          const hasMessages = await this.chatRepo.hasAnyMessages(roomId);
-          if (!hasMessages) {
-            const [sender] = await this.usersRepo.getById(req.from_user_id);
-            const senderName = sender?.name ?? null;
-            await this.firebase.addChatMessage({ chatId: roomId, senderUserId: req.from_user_id, senderName, kind: 'text', body: req.message, createdAt: Date.now() });
-            await this.chatRepo.createTextMessage({ chatId: roomId, senderUserId: req.from_user_id, body: req.message });
-          }
-        }
+      // Only now (on acceptance) create the Firebase RTDB room entry
+      await this.firebase.createChatRoom({
+        id: roomId,
+        type: 'DM',
+        meetupId: null,
+        participants: [
+          { userId: req.from_user_id, isAdmin: false },
+          { userId: req.to_user_id, isAdmin: false },
+        ],
+        createdAt: Date.now(),
+      });
+
+      // Seed first message from original request, if present
+      if (req.message && String(req.message).trim().length > 0) {
+        const [sender] = await this.usersRepo.getById(req.from_user_id);
+        const senderName = sender?.name ?? null;
+        await this.firebase.addChatMessage({ chatId: roomId, senderUserId: req.from_user_id, senderName, kind: 'text', body: req.message, createdAt: Date.now() });
+        await this.chatRepo.createTextMessage({ chatId: roomId, senderUserId: req.from_user_id, body: req.message });
       }
 
       // Update status to accepted

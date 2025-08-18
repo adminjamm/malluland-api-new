@@ -109,6 +109,16 @@ meetupsRouter.delete('/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+// Get by id
+meetupsRouter.get('/:id', async (c) => {
+  const id = c.req.param('id');
+  const requestUserId = c.req.header('x-user-id') || undefined;
+  const rows = await svc().getMeetupById(id, requestUserId);
+  if (!rows || (Array.isArray(rows) && rows.length === 0)) return c.json({ error: 'Not found' }, 404);
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  return c.json(row);
+});
+
 // Attendees
 meetupsRouter.get('/:id/attendees', async (c) => {
   const id = c.req.param('id');
