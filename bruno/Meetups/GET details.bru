@@ -1,0 +1,19 @@
+meta {
+  name: Meetups: Get details by id
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{endpoint}}/meetups/0201de86-a03a-4368-b545-75a7ba4a9be4
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-user-id: d7c351f8-18a4-4840-ac6f-2f27103cd048
+}
+
+settings {
+  encodeUrl: true
+}

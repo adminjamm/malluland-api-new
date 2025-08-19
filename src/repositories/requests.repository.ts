@@ -102,6 +102,13 @@ export class RequestsRepository {
     return this.db.insert(chatRequests).values(row).returning();
   }
 
+  async setChatRequestRoom(id: string, chatRoomId: string) {
+    const q = sql`UPDATE chat_requests SET chat_room_id = ${chatRoomId}, updated_at = NOW() WHERE id = ${id} RETURNING *`;
+    const res = await this.db.execute(q);
+    const rows = Array.isArray(res) ? (res as any) : (res as any).rows;
+    return rows as any[];
+  }
+
   async listAllReceived(userId: string, limit: number, offset: number): Promise<RequestItem[]> {
     const q = sql`
       (

@@ -121,4 +121,58 @@ export class ChatsRepository {
       host: r.host__id ? { id: String(r.host__id), name: r.host__name ?? null } : null,
     }));
   }
+
+  async listRoomsV2(userId: string, limit: number, offset: number): Promise<any[]> {
+    const q = sql`
+      WITH filtered_chatrooms AS (
+        SELECT cr.*
+        FROM chat_rooms cr 
+        WHERE 
+          cr.deleted_at IS NULL
+          AND EXISTS (
+            SELECT 1 FROM chat_room_participants crp 
+            WHERE crp.chat_room_id = cr.id
+              AND crp.user_id = ${userId}
+              AND crp.status = 'active'
+          )
+          AND (
+            SELECT COUNT(*) FROM chat_room_participants crp 
+            WHERE crp.chat_room_id = cr.id
+          ) > 1
+          AND (
+            cr.type != 'DM'
+            OR NOT EXISTS (
+              SELECT 1 
+              FROM chat_room_participants crp1 
+              JOIN chat_room_participants crp2 ON 
+                crp1.chat_room_id = crp2.chat_room_id 
+                AND crp1.user_id != crp2.user_id 
+              JOIN blocked_user bu ON 
+                (bu.user_id = crp1.user_id AND bu.blocked_user_id = crp2.user_id)
+                OR 
+                (bu.user_id = crp2.user_id AND bu.blocked_user_id = crp1.user_id)
+              WHERE crp1.chat_room_id = cr.id
+            )
+          )
+        ORDER BY cr.created_at DESC
+        OFFSET ${offset}
+        LIMIT ${limit}
+      )
+      SELECT 
+        c.*,
+        dmr_requestor.name as requestor_name,
+        dm_creator.name as dm_creator_name,
+        m.*,
+        meetup_creator.name as meetup_creator_name
+      FROM filtered_chatrooms c
+      LEFT JOIN chat_requests chr ON c.id = chr.chat_room_id
+      LEFT JOIN users dmr_requestor ON chr.from_user_id = dmr_requestor.id
+      LEFT JOIN users dm_creator ON chr.to_user_id = dm_creator.id
+      LEFT JOIN meetups m ON c.id = m.chat_room_id
+      LEFT JOIN users meetup_creator ON m.host_id = meetup_creator.id
+    `;
+    const res = await this.db.execute(q);
+    const rows = (Array.isArray(res) ? (res as any) : (res as any).rows) as any[];
+    return rows;
+  }
 }

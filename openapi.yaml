@@ -192,6 +192,65 @@ paths:
                   pageSize: { type: integer }
                   items: { type: array, items: { type: object } }
   /meetups/{id}:
+    get:
+      summary: Get meetup by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Meetup details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                  name: { type: string }
+                  startsAt: { type: string, format: date-time }
+                  endsAt: { type: string, format: date-time, nullable: true }
+                  city: { type: string, nullable: true }
+                  state: { type: string, nullable: true }
+                  country: { type: string, nullable: true }
+                  activityId: { type: integer }
+                  whoPays: { type: string, nullable: true }
+                  feeAmount: { type: string, nullable: true }
+                  guests: { type: integer }
+                  hostId: { type: string, format: uuid }
+                  hostName: { type: string, nullable: true }
+                  hostAvatar: { type: string, nullable: true }
+                  locationText: { type: string, nullable: true }
+                  description: { type: string, nullable: true }
+                  mapUrl: { type: string, nullable: true }
+                  meetupStatus: { type: string }
+                  isRequested: { type: boolean }
+              examples:
+                sample:
+                  summary: Example meetup details
+                  value:
+                    id: "2a7b0c5e-1a2b-4d3e-9f10-112233445566"
+                    name: "Coffee chat"
+                    startsAt: "2025-09-01T10:00:00.000Z"
+                    endsAt: "2025-09-01T11:00:00.000Z"
+                    city: "Kochi"
+                    state: "Kerala"
+                    country: "India"
+                    activityId: 3
+                    whoPays: "split"
+                    feeAmount: "0"
+                    guests: 2
+                    hostId: "d7c351f8-18a4-4840-ac6f-2f27103cd048"
+                    hostName: "Amogh"
+                    hostAvatar: "https://cdn.example.com/avatars/amogh.jpg"
+                    locationText: "Cafe XYZ, MG Road"
+                    description: "Casual coffee to discuss tech and movies."
+                    mapUrl: "https://maps.example.com/?q=cafe"
+                    meetupStatus: "active"
+                    isRequested: false
+        '404':
+          description: Not found
     patch:
       summary: Update a meetup
       security:
@@ -407,6 +466,40 @@ paths:
   /chats/rooms:
     get:
       summary: List chat rooms for the authenticated user
+  /chats/v2/rooms:
+    get:
+      summary: List chat rooms (v2)
+      description: Advanced room listing with filtering and joins. Only shows rooms where caller is an active participant, excludes single-user rooms, and excludes DMs where either participant has blocked the other.
+      security:
+        - XUserId: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: A paginated list of chat rooms (v2)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page: { type: integer }
+                  pageSize: { type: integer }
+                  items: { type: array, items: { type: object } }
+        '401': { description: Unauthorized }
       description: Returns the chat rooms in which the caller participates, including unread count and the last message metadata.
       parameters:
         - in: query
