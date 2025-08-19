@@ -34,6 +34,25 @@ chatsRouter.get(
   }
 );
 
+// Send a chat message to a room
+chatsRouter.post(
+  '/rooms/:id/send',
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator('json', z.object({ text: z.string().min(1) })),
+  async (c) => {
+    const userId = c.req.header('x-user-id');
+    if (!userId) return c.json({ error: 'x-user-id header required' }, 400);
+    const chatId = c.req.param('id');
+    const { text } = c.req.valid('json');
+    try {
+      const msg = await Container.get(ChatsService).sendMessage(chatId, userId, text);
+      return c.json(msg, 201);
+    } catch (e) {
+      return c.json({ error: (e as Error).message }, 400);
+    }
+  }
+);
+
 // V2 rooms list with additional filters and joins
 chatsRouter.get(
   '/v2/rooms',

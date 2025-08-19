@@ -84,4 +84,18 @@ export class ChatRepository {
     const rows = Array.isArray(res) ? res : res.rows;
     return !!(rows && rows.length);
   }
+
+  async roomExists(chatId: string): Promise<boolean> {
+    const q = sql`SELECT 1 FROM chat_rooms WHERE id = ${chatId} LIMIT 1`;
+    const res: any = await this.db.execute(q);
+    const rows = Array.isArray(res) ? res : res.rows;
+    return !!(rows && rows.length);
+  }
+
+  async isActiveParticipant(chatId: string, userId: string): Promise<boolean> {
+    const q = sql`SELECT 1 FROM chat_room_participants WHERE chat_room_id = ${chatId} AND user_id = ${userId} AND status = 'active' LIMIT 1`;
+    const res: any = await this.db.execute(q);
+    const rows = Array.isArray(res) ? res : res.rows;
+    return !!(rows && rows.length);
+  }
 }

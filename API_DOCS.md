@@ -166,6 +166,13 @@ Response 200:
 
 ### GET /chats/v2/rooms/:id
 Get a single chat room’s details. Same fields as items in the list above.
+
+### POST /chats/rooms/:id/send
+- Headers: x-user-id
+- Body: { text: string }
+- Behavior: Validates membership in the room and inserts a text message, then pushes the same message to Firebase RTDB.
+- Response: 201 { id, chatId, senderUserId, kind: 'text', body, createdAt }
+Get a single chat room’s details. Same fields as items in the list above.
 - GET /requests
   - Headers: x-user-id
   - Query: filter (all|meetups|chats, default all), page (default 1)
