@@ -5,9 +5,13 @@ meta {
 }
 
 get {
-  url: {{endpoint}}/users/{{userId}}/photos
+  url: {{endpoint}}/users/photos
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 settings {

@@ -56,7 +56,33 @@ export class UsersRepository {
     await this.db.insert(userPhotos).values(row);
     return row;
   }
-  listPhotos(userId: string) {
+  async addPhotos(
+    userId: string,
+    photos: {
+      originalUrl: string;
+      imageType: string;
+      position: number;
+      optimizedUrl?: string | null;
+    }[]
+  ) {
+    const rows = photos.map((photo) => ({
+      userId,
+      originalUrl: photo.originalUrl,
+      optimizedUrl: photo.optimizedUrl ?? null,
+      imageType: photo.imageType,
+      position: photo.position,
+    }));
+    if (rows.length > 0) {
+      await this.db
+        .delete(userPhotos)
+        .where(
+          and(eq(userPhotos.userId, userId), eq(userPhotos.imageType, "photo"))
+        );
+    }
+    await this.db.insert(userPhotos).values(rows);
+    return rows;
+  }
+  listPhotos(userId: string, type?: string) {
     return this.db
       .select({
         id: userPhotos.id,
@@ -68,7 +94,11 @@ export class UsersRepository {
         createdAt: userPhotos.createdAt,
       })
       .from(userPhotos)
-      .where(eq(userPhotos.userId, userId))
+      .where(
+        type
+          ? and(eq(userPhotos.userId, userId), eq(userPhotos.imageType, type))
+          : eq(userPhotos.userId, userId)
+      )
       .orderBy(userPhotos.position);
   }
 
@@ -237,11 +267,7 @@ export class UsersRepository {
     return rows;
   }
 
-  async addUserFavoriteText(
-    userId: string,
-    category: string,
-    value: string
-  ) {
+  async addUserFavoriteText(userId: string, category: string, value: string) {
     // Count existing to enforce max 5 and determine next position
     const existing = await this.db
       .select({ position: userFavoritesText.position })
@@ -283,13 +309,21 @@ export class UsersRepository {
 
   // User location
   async getUserLocation(userId: string) {
-    const rows = await this.db.select().from(userLocation).where(eq(userLocation.userId, userId)).limit(1);
+    const rows = await this.db
+      .select()
+      .from(userLocation)
+      .where(eq(userLocation.userId, userId))
+      .limit(1);
     return rows[0] ?? null;
   }
 
   async upsertUserLocation(
     userId: string,
-    data: Partial<{ lat: number | null; lng: number | null; closestAirportCode: string | null }>
+    data: Partial<{
+      lat: number | null;
+      lng: number | null;
+      closestAirportCode: string | null;
+    }>
   ) {
     const existing = await this.getUserLocation(userId);
     const now = new Date();
@@ -300,7 +334,11 @@ export class UsersRepository {
 
     // Auto-compute closestAirportCode if not explicitly provided
     let closestAirportCode: string | null | undefined = data.closestAirportCode;
-    if (closestAirportCode === undefined && typeof lat === "number" && typeof lng === "number") {
+    if (
+      closestAirportCode === undefined &&
+      typeof lat === "number" &&
+      typeof lng === "number"
+    ) {
       try {
         const airportsRepo = Container.get(AirportsRepository);
         const nearest = await airportsRepo.findNearestIata(lat, lng);
@@ -317,7 +355,8 @@ export class UsersRepository {
         .set({
           lat: data.lat ?? existing.lat ?? null,
           lng: data.lng ?? existing.lng ?? null,
-          closestAirportCode: closestAirportCode ?? existing.closestAirportCode ?? null,
+          closestAirportCode:
+            closestAirportCode ?? existing.closestAirportCode ?? null,
           updatedAt: now,
         } as any)
         .where(eq(userLocation.userId, userId));
@@ -337,7 +376,11 @@ export class UsersRepository {
 
   // User settings
   async getUserSettings(userId: string) {
-    const rows = await this.db.select().from(userSettings).where(eq(userSettings.userId, userId)).limit(1);
+    const rows = await this.db
+      .select()
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId))
+      .limit(1);
     return rows[0] ?? null;
   }
 

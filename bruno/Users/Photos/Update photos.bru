@@ -1,0 +1,31 @@
+meta {
+  name: Update photos
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{endpoint}}/users/photos
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  [{
+    "position":1,
+    "imageType": "photo",
+    "originalUrl": "public/profiles/1755503811903-tHi6sr0Vx_r0JLZNkAu3Tfj9BOG4.jpg"
+  },{
+    "position":2,
+    "imageType": "photo",
+    "originalUrl": "public/profiles/1755503811903-tHi6sr0Vx_r0JLZNkAu3Tfj9BOG4.jpg"
+  }]
+}
+
+settings {
+  encodeUrl: true
+}

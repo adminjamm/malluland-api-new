@@ -28,7 +28,7 @@ usersRouter.get(
   "/me",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
 
     console.log("[users] GET /me - userId:", userId);
     const [
@@ -71,7 +71,7 @@ usersRouter.get(
         )[0] || [];
 
     const profilePhotos = photos.filter(
-      (p) => p.imageType !== "avatar" && p.isActive === true
+      (p) => p.imageType === "photo" && p.isActive === true
     );
 
     const favoritesGrouped = favoritesText
@@ -153,11 +153,11 @@ usersRouter.put(
       company: z.string().max(50).optional(),
       position: z.string().max(50).optional(),
       bio: z.string().max(150).optional(),
-      avatar: z.string().optional(),
+      isProfileOnboardingCompleted: z.boolean().optional(),
     })
   ),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const body = c.req.valid("json");
     const user = await svc().updateUser(userId, body);
     return c.json({
@@ -168,7 +168,7 @@ usersRouter.put(
 
 // Photos
 usersRouter.post(
-  "/photos",
+  "/photo",
   authorize({ bypassOnboardingCheck: true }),
   zValidator(
     "json",
@@ -179,7 +179,7 @@ usersRouter.post(
     })
   ),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const data = c.req.valid("json");
     console.log(data);
     const row = await svc().addPhoto(userId, data);
@@ -188,12 +188,36 @@ usersRouter.post(
     });
   }
 );
+usersRouter.post(
+  "/photos",
+  authorize({ bypassOnboardingCheck: true }),
+  zValidator(
+    "json",
+    z.array(
+      z.object({
+        originalUrl: z.string(),
+        imageType: z.string(),
+        position: z.number().int().nonnegative(),
+      })
+    )
+  ),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const data = c.req.valid("json");
+    console.log(data);
+    const row = await svc().addPhotos(userId, data);
+    return c.json({
+      data: row,
+    });
+  }
+);
+
 usersRouter.get(
   "/photos",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
-    const rows = await svc().listPhotos(userId);
+    const userId = c.get("profile").id;
+    const rows = await svc().listPhotos(userId, "photo");
     return c.json({ data: rows });
   }
 );
@@ -204,10 +228,10 @@ usersRouter.post(
   authorize({ bypassOnboardingCheck: true }),
   zValidator(
     "json",
-    z.object({ selfieUrl: z.string().url(), status: z.string().optional() })
+    z.object({ selfieUrl: z.string(), status: z.string().optional() })
   ),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const { selfieUrl } = c.req.valid("json");
     const row = await svc().addSelfie(userId, selfieUrl);
     return c.json({ data: row });
@@ -217,7 +241,7 @@ usersRouter.get(
   "/selfies",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const rows = await svc().listSelfies(userId);
     return c.json({ data: rows });
   }
@@ -232,7 +256,7 @@ usersRouter.post(
     z.object({ interestIds: z.array(z.number().int()).min(1) })
   ),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const { interestIds } = c.req.valid("json");
     await svc().replaceInterests(userId, interestIds);
     const rows = await svc().listInterests(userId);
@@ -243,7 +267,7 @@ usersRouter.get(
   "/interests",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const rows = await svc().listInterests(userId);
     return c.json({ data: rows });
   }
@@ -255,7 +279,7 @@ usersRouter.post(
   authorize({ bypassOnboardingCheck: true }),
   zValidator("json", z.object({ traitIds: z.array(z.number().int()).min(1) })),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const { traitIds } = c.req.valid("json");
     await svc().replaceTraits(userId, traitIds);
     const rows = await svc().listTraits(userId);
@@ -266,7 +290,7 @@ usersRouter.get(
   "/traits",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const rows = await svc().listTraits(userId);
     return c.json({ data: rows });
   }
@@ -278,7 +302,7 @@ usersRouter.post(
   authorize({ bypassOnboardingCheck: true }),
   zValidator("json", z.object({ actorIds: z.array(z.number().int()).min(1) })),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const { actorIds } = c.req.valid("json");
     await svc().replaceFavoriteActors(userId, actorIds);
     const rows = await svc().listFavoriteActors(userId);
@@ -289,7 +313,7 @@ usersRouter.get(
   "/favorite-actors",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const rows = await svc().listFavoriteActors(userId);
     return c.json({ data: rows });
   }
@@ -304,7 +328,7 @@ usersRouter.post(
     z.object({ actressIds: z.array(z.number().int()).min(1) })
   ),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const { actressIds } = c.req.valid("json");
     await svc().replaceFavoriteActresses(userId, actressIds);
     const rows = await svc().listFavoriteActresses(userId);
@@ -315,7 +339,7 @@ usersRouter.get(
   "/favorite-actresses",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const rows = await svc().listFavoriteActresses(userId);
     return c.json({ data: rows });
   }
@@ -338,7 +362,7 @@ usersRouter.post(
     })
   ),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const { links } = c.req.valid("json");
     await svc().replaceSocialLinks(userId, links);
     const rows = await svc().listSocialLinks(userId);
@@ -349,7 +373,7 @@ usersRouter.get(
   "/social-links",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const rows = await svc().listSocialLinks(userId);
     return c.json({ data: rows });
   }
@@ -360,7 +384,7 @@ usersRouter.get(
   "/settings",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const settings = await svc().getUserSettings(userId);
     return c.json({ data: settings });
   }
@@ -372,12 +396,15 @@ usersRouter.put(
   zValidator(
     "json",
     z.object({
-      chatAudience: z.enum(["anyone", "men", "women", "others"]).nullable().optional(),
+      chatAudience: z
+        .enum(["anyone", "men", "women", "others"])
+        .nullable()
+        .optional(),
       pushEnabled: z.boolean().nullable().optional(),
     })
   ),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const body = c.req.valid("json");
     const updated = await svc().upsertUserSettings(userId, body);
     return c.json({ data: updated });
@@ -389,7 +416,7 @@ usersRouter.get(
   "/location",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const row = await svc().getUserLocation(userId);
     return c.json({ data: row });
   }
@@ -407,7 +434,7 @@ usersRouter.put(
     })
   ),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const body = c.req.valid("json");
     const updated = await svc().upsertUserLocation(userId, body);
     return c.json({ data: updated });
@@ -425,7 +452,7 @@ usersRouter.put(
   authorize({ bypassOnboardingCheck: true }),
   zValidator("json", userFavoritesTextSchema),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const { category, values } = c.req.valid("json");
 
     const rows = await svc().replaceUserFavoritesText(userId, category, values);
@@ -438,7 +465,7 @@ usersRouter.post(
   authorize({ bypassOnboardingCheck: true }),
   zValidator("json", userFavoritesTextSchema),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const { category, values } = c.req.valid("json");
 
     const rows = await svc().replaceUserFavoritesText(userId, category, values);
@@ -455,7 +482,7 @@ usersRouter.post(
     z.object({ category: z.string(), value: z.string().max(150) })
   ),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const { category, value } = c.req.valid("json");
     const row = await svc().addUserFavoriteText(userId, category, value);
     return c.json({ data: row });
@@ -466,7 +493,7 @@ usersRouter.get(
   "/user-favorites",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header('x-user-id');
+    const userId = c.get("profile").id;
     const category = c.req.query("category");
 
     const rows = await svc().listUserFavorites(userId, category);

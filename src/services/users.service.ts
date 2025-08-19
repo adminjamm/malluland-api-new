@@ -26,8 +26,19 @@ export class UsersService {
   ) {
     return this.repo.addPhoto(userId, input);
   }
-  listPhotos(userId: string) {
-    return this.repo.listPhotos(userId);
+  addPhotos(
+    userId: string,
+    input: {
+      originalUrl: string;
+      imageType: string;
+      position: number;
+      optimizedUrl?: string | null;
+    }[]
+  ) {
+    return this.repo.addPhotos(userId, input);
+  }
+  listPhotos(userId: string, type?: string) {
+    return this.repo.listPhotos(userId, type);
   }
 
   addSelfie(userId: string, selfieUrl: string) {
@@ -93,7 +104,11 @@ export class UsersService {
   }
   upsertUserLocation(
     userId: string,
-    data: Partial<{ lat: number | null; lng: number | null; closestAirportCode: string | null }>
+    data: Partial<{
+      lat: number | null;
+      lng: number | null;
+      closestAirportCode: string | null;
+    }>
   ) {
     return this.repo.upsertUserLocation(userId, data);
   }
