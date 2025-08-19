@@ -2,15 +2,15 @@ import { Hono, type Context } from "hono";
 import { getConnInfo } from "@hono/node-server/conninfo";
 // import { UAParser } from "ua-parser-js";
 import {
+  AppleScopeUser,
+  decodeAppleIdToken,
   generateAuthTokens,
+  getAppleAccessToken,
+  getAppleAuthUrl,
+  getAppleProfileName,
   getGoogleAccessToken,
   getGoogleAuthUrl,
   getGoogleUser,
-  //   getAppleAuthUrl,
-  //   getAppleAccessToken,
-  //   decodeAppleIdToken,
-  //   type AppleScopeUser,
-  //   getAppleProfileName,
 } from "../utils/auth";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
@@ -58,57 +58,51 @@ authRouter.get(
   }
 );
 
-// authRouter.get(
-//   "/apple/url",
-//   zValidator("query", getUrlQuerySchema),
-//   async (c) => {
-//     const { requestedFrom } = c.req.valid("query");
-//     const url = getAppleAuthUrl(requestedFrom);
+authRouter.get("/apple/url", async (c) => {
+  const url = getAppleAuthUrl("mobile");
 
-//     return c.json({ data: url.toString() });
-//   }
-// );
+  return c.json({ data: url.toString() });
+});
 
-// authRouter.post(
-//   "/apple/callback",
-//   zValidator(
-//     "form",
-//     authCallbackSchema.extend({
-//       user: z
-//         .string()
-//         .transform((str) => {
-//           try {
-//             return JSON.parse(str) as AppleScopeUser;
-//           } catch {
-//             throw new Error("Invalid user data format");
-//           }
-//         })
-//         .optional(),
-//     })
-//   ),
-//   async (c) => {
-//     const { state, code, user: scopeUser } = c.req.valid("form");
+authRouter.post(
+  "/apple/callback",
+  zValidator(
+    "form",
+    authCallbackSchema.extend({
+      user: z
+        .string()
+        .transform((str) => {
+          try {
+            return JSON.parse(str) as AppleScopeUser;
+          } catch {
+            throw new Error("Invalid user data format");
+          }
+        })
+        .optional(),
+    })
+  ),
+  async (c) => {
+    const { code, user: scopeUser } = c.req.valid("form");
 
-//     const tokens = await getAppleAccessToken(code);
-//     const decodedIdToken = await decodeAppleIdToken(tokens?.idToken());
-//     const name = await getAppleProfileName(decodedIdToken, scopeUser);
+    const tokens = await getAppleAccessToken(code);
+    const decodedIdToken = await decodeAppleIdToken(tokens?.idToken());
+    const name = await getAppleProfileName(decodedIdToken, scopeUser);
 
-//     const oauthUser: OAuthUser = {
-//       email: decodedIdToken.email,
-//       sub: decodedIdToken.sub,
-//       name,
-//     };
+    const oauthUser: OAuthUser = {
+      email: decodedIdToken.email,
+      sub: decodedIdToken.sub,
+      name,
+    };
 
-//     console.log({ oauthUser, name, decodedIdToken, scopeUser });
+    console.log({ oauthUser, name, decodedIdToken, scopeUser });
 
-//     return handleOAuthCallback({
-//       context: c,
-//       user: oauthUser,
-//       provider: "apple",
-//       state,
-//     });
-//   }
-// );
+    return handleOAuthCallback({
+      context: c,
+      user: oauthUser,
+      provider: "apple",
+    });
+  }
+);
 
 type OAuthUser = {
   email?: string;
