@@ -123,6 +123,7 @@ export class ChatsRepository {
   }
 
   async listRoomsV2(userId: string, limit: number, offset: number): Promise<any[]> {
+    console.log('listRoomsV2 called with userId:', userId, 'limit:', limit, 'offset:', offset);
     const q = sql`
       WITH filtered_chatrooms AS (
         SELECT cr.*
@@ -159,12 +160,17 @@ export class ChatsRepository {
         LIMIT ${limit}
       )
       SELECT 
-        c.*,
+        c.id AS id,
+        c.type::text AS type,
+        c.meetup_id,
+        c.created_at,
+        c.updated_at,
+        c.deleted_at,
         dmr_requestor.name as requestor_name,
         dmr_requestor.id as requestor_id,
         dm_creator.name as dm_creator_name,
         dm_creator.id as dm_creator_id,
-        m.*,
+        m.id AS meetup_id,
         meetup_creator.name as meetup_creator_name,
         meetup_creator.id as meetup_creator_id,
         COALESCE(m_avatar.optimized_url, m_avatar.original_url) AS meetup_creator_avatar,
@@ -199,6 +205,7 @@ export class ChatsRepository {
       ) m_avatar ON TRUE
     `;
     const res = await this.db.execute(q);
+    console.log('listRoomsV2 result:', res);
     const rows = (Array.isArray(res) ? (res as any) : (res as any).rows) as any[];
     return rows;
   }
@@ -206,10 +213,15 @@ export class ChatsRepository {
   async getRoomDetailsV2(id: string): Promise<any | null> {
     const q = sql`
       SELECT 
-        cr.*,
+        cr.id AS id,
+        cr.type::text AS type,
+        cr.meetup_id,
+        cr.created_at,
+        cr.updated_at,
+        cr.deleted_at,
         dmr_requestor.name as requestor_name,
         dm_creator.name as dm_creator_name,
-        m.*,
+        m.id AS meetup_id,
         meetup_creator.name as meetup_creator_name,
         COALESCE(m_avatar.optimized_url, m_avatar.original_url) AS meetup_creator_avatar,
         COALESCE(dmr_avatar.optimized_url, dmr_avatar.original_url) AS dm_requestor_avatar,
