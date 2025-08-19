@@ -560,7 +560,58 @@ paths:
                 properties:
                   page: { type: integer }
                   pageSize: { type: integer }
-                  items: { type: array, items: { type: object } }
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        type: { type: string, enum: [DM, meetup] }
+                        meetup_id: { type: string, format: uuid, nullable: true }
+                        deleted_at: { type: string, format: date-time, nullable: true }
+                        created_at: { type: string, format: date-time, nullable: true }
+                        updated_at: { type: string, format: date-time, nullable: true }
+                        requestor_name: { type: string, nullable: true }
+                        dm_creator_name: { type: string, nullable: true }
+                        meetup_creator_name: { type: string, nullable: true }
+                        meetup_creator_avatar: { type: string, nullable: true }
+                        dm_requestor_avatar: { type: string, nullable: true }
+                        dm_creator_avatar: { type: string, nullable: true }
+        '401': { description: Unauthorized }
+  /chats/v2/rooms/{id}:
+    get:
+      summary: Get chat room details (v2)
+      description: Returns a single chat room row with optional joined fields (DM requestor/creator names and avatars, meetup host details and avatar).
+      security:
+        - XUserId: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Chat room details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                  type: { type: string, enum: [DM, meetup] }
+                  meetup_id: { type: string, format: uuid, nullable: true }
+                  deleted_at: { type: string, format: date-time, nullable: true }
+                  created_at: { type: string, format: date-time, nullable: true }
+                  updated_at: { type: string, format: date-time, nullable: true }
+                  requestor_name: { type: string, nullable: true }
+                  dm_creator_name: { type: string, nullable: true }
+                  meetup_creator_name: { type: string, nullable: true }
+                  meetup_creator_avatar: { type: string, nullable: true }
+                  dm_requestor_avatar: { type: string, nullable: true }
+                  dm_creator_avatar: { type: string, nullable: true }
+        '404': { description: Not found }
         '401': { description: Unauthorized }
   /requests/chats/{id}/accept:
     post:

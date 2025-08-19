@@ -161,18 +161,91 @@ export class ChatsRepository {
       SELECT 
         c.*,
         dmr_requestor.name as requestor_name,
+        dmr_requestor.id as requestor_id,
         dm_creator.name as dm_creator_name,
+        dm_creator.id as dm_creator_id,
         m.*,
-        meetup_creator.name as meetup_creator_name
+        meetup_creator.name as meetup_creator_name,
+        meetup_creator.id as meetup_creator_id,
+        COALESCE(m_avatar.optimized_url, m_avatar.original_url) AS meetup_creator_avatar,
+        COALESCE(dmr_avatar.optimized_url, dmr_avatar.original_url) AS dm_requestor_avatar,
+        COALESCE(dmc_avatar.optimized_url, dmc_avatar.original_url) AS dm_creator_avatar
       FROM filtered_chatrooms c
       LEFT JOIN chat_requests chr ON c.id = chr.chat_room_id
       LEFT JOIN users dmr_requestor ON chr.from_user_id = dmr_requestor.id
       LEFT JOIN users dm_creator ON chr.to_user_id = dm_creator.id
+      LEFT JOIN LATERAL (
+        SELECT up.optimized_url, up.original_url
+        FROM user_photos up
+        WHERE up.user_id = chr.from_user_id AND up.image_type = 'avatar' AND up.is_active = true
+        ORDER BY up.position ASC, up.created_at DESC
+        LIMIT 1
+      ) dmr_avatar ON TRUE
+      LEFT JOIN LATERAL (
+        SELECT up.optimized_url, up.original_url
+        FROM user_photos up
+        WHERE up.user_id = chr.to_user_id AND up.image_type = 'avatar' AND up.is_active = true
+        ORDER BY up.position ASC, up.created_at DESC
+        LIMIT 1
+      ) dmc_avatar ON TRUE
       LEFT JOIN meetups m ON c.id = m.chat_room_id
       LEFT JOIN users meetup_creator ON m.host_id = meetup_creator.id
+      LEFT JOIN LATERAL (
+        SELECT up.optimized_url, up.original_url
+        FROM user_photos up
+        WHERE up.user_id = m.host_id AND up.image_type = 'avatar' AND up.is_active = true
+        ORDER BY up.position ASC, up.created_at DESC
+        LIMIT 1
+      ) m_avatar ON TRUE
     `;
     const res = await this.db.execute(q);
     const rows = (Array.isArray(res) ? (res as any) : (res as any).rows) as any[];
     return rows;
+  }
+
+  async getRoomDetailsV2(id: string): Promise<any | null> {
+    const q = sql`
+      SELECT 
+        cr.*,
+        dmr_requestor.name as requestor_name,
+        dm_creator.name as dm_creator_name,
+        m.*,
+        meetup_creator.name as meetup_creator_name,
+        COALESCE(m_avatar.optimized_url, m_avatar.original_url) AS meetup_creator_avatar,
+        COALESCE(dmr_avatar.optimized_url, dmr_avatar.original_url) AS dm_requestor_avatar,
+        COALESCE(dmc_avatar.optimized_url, dmc_avatar.original_url) AS dm_creator_avatar
+      FROM chat_rooms cr
+      LEFT JOIN chat_requests chr ON cr.id = chr.chat_room_id
+      LEFT JOIN users dmr_requestor ON chr.from_user_id = dmr_requestor.id
+      LEFT JOIN users dm_creator ON chr.to_user_id = dm_creator.id
+      LEFT JOIN LATERAL (
+        SELECT up.optimized_url, up.original_url
+        FROM user_photos up
+        WHERE up.user_id = chr.from_user_id AND up.image_type = 'avatar' AND up.is_active = true
+        ORDER BY up.position ASC
+        LIMIT 1
+      ) dmr_avatar ON TRUE
+      LEFT JOIN LATERAL (
+        SELECT up.optimized_url, up.original_url
+        FROM user_photos up
+        WHERE up.user_id = chr.to_user_id AND up.image_type = 'avatar' AND up.is_active = true
+        ORDER BY up.position ASC
+        LIMIT 1
+      ) dmc_avatar ON TRUE
+      LEFT JOIN meetups m ON cr.id = m.chat_room_id
+      LEFT JOIN users meetup_creator ON m.host_id = meetup_creator.id
+      LEFT JOIN LATERAL (
+        SELECT up.optimized_url, up.original_url
+        FROM user_photos up
+        WHERE up.user_id = m.host_id AND up.image_type = 'avatar' AND up.is_active = true
+        ORDER BY up.position ASC
+        LIMIT 1
+      ) m_avatar ON TRUE
+      WHERE cr.id = ${id}
+      LIMIT 1
+    `;
+    const res: any = await this.db.execute(q);
+    const rows = Array.isArray(res) ? res : res.rows;
+    return rows && rows.length ? rows[0] : null;
   }
 }

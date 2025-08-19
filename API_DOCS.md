@@ -139,7 +139,7 @@ Response 200:
 }
 
 ### GET /chats/v2/rooms
-Advanced room listing with filtering and joins. Only shows rooms where caller is an active participant, excludes single-user rooms, and excludes DMs where either participant has blocked the other. Includes optional DM requestor/creator names and meetup details for meetup rooms.
+Advanced room listing with filtering and joins. Only shows rooms where caller is an active participant, excludes single-user rooms, and excludes DMs where either participant has blocked the other. Includes optional DM requestor/creator names and avatars, plus meetup host details and avatar for meetup rooms.
 
 Query params:
 - page (integer, default 1)
@@ -149,8 +149,23 @@ Response 200:
 {
   "page": 1,
   "pageSize": 10,
-  "items": [ { /* joined row per room */ } ]
+  "items": [
+    {
+      "id": "uuid",
+      "type": "DM|meetup",
+      "meetup_id": "uuid|null",
+      "requestor_name": "string|null",
+      "dm_creator_name": "string|null",
+      "meetup_creator_name": "string|null",
+      "meetup_creator_avatar": "url|null",
+      "dm_requestor_avatar": "url|null",
+      "dm_creator_avatar": "url|null"
+    }
+  ]
 }
+
+### GET /chats/v2/rooms/:id
+Get a single chat room’s details. Same fields as items in the list above.
 - GET /requests
   - Headers: x-user-id
   - Query: filter (all|meetups|chats, default all), page (default 1)

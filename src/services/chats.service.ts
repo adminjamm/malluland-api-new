@@ -17,4 +17,8 @@ export class ChatsService {
     const offset = (page - 1) * limit;
     return this.repo.listRoomsV2(userId, limit, offset);
   }
+
+  getRoomV2(id: string): Promise<any | null> {
+    return this.repo.getRoomDetailsV2(id);
+  }
 }

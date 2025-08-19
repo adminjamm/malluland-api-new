@@ -20,6 +20,20 @@ chatsRouter.get(
   }
 );
 
+// V2 room details by id
+chatsRouter.get(
+  '/v2/rooms/:id',
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.req.header('x-user-id');
+    if (!userId) return c.json({ error: 'x-user-id header required' }, 400);
+    const id = c.req.param('id');
+    const item = await Container.get(ChatsService).getRoomV2(id);
+    if (!item) return c.json({ error: 'Not found' }, 404);
+    return c.json(item);
+  }
+);
+
 // V2 rooms list with additional filters and joins
 chatsRouter.get(
   '/v2/rooms',
