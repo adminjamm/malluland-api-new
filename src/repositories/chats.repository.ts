@@ -282,6 +282,28 @@ export class ChatsRepository {
     return items;
   }
 
+  async listParticipants(chatId: string): Promise<Array<{ userId: string; name: string | null; avatarUrl: string | null }>> {
+    const q = sql`
+      SELECT 
+        p.user_id AS user_id,
+        u.name AS name,
+        COALESCE(up.optimized_url, up.original_url) AS avatar_url
+      FROM chat_room_participants p
+      LEFT JOIN users u ON u.id = p.user_id
+      LEFT JOIN LATERAL (
+        SELECT ph.optimized_url, ph.original_url
+        FROM user_photos ph
+        WHERE ph.user_id = p.user_id AND ph.image_type = 'avatar' AND ph.is_active = true
+        ORDER BY ph.position ASC, ph.created_at DESC
+        LIMIT 1
+      ) up ON TRUE
+      WHERE p.chat_room_id = ${chatId} AND p.status = 'active'
+    `;
+    const res: any = await this.db.execute(q);
+    const rows = Array.isArray(res) ? res : res.rows;
+    return (rows || []).map((r: any) => ({ userId: String(r.user_id), name: r.name ?? null, avatarUrl: r.avatar_url ?? null }));
+  }
+
   async getRoomDetailsV2(id: string): Promise<any | null> {
     const q = sql`
       SELECT 

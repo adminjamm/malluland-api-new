@@ -35,6 +35,13 @@ export class ChatsService {
     return this.repo.getRoomDetailsV2(id);
   }
 
+  async getRoomV2WithParticipants(id: string): Promise<any | null> {
+    const item = await this.repo.getRoomDetailsV2(id);
+    if (!item) return null;
+    const participants = await (this.repo as any).listParticipants(id);
+    return { ...item, participants };
+  }
+
   async sendMessage(chatId: string, senderUserId: string, text: string) {
     const body = (text ?? '').trim();
     if (!body) throw new Error('Message text is required');
@@ -58,6 +65,7 @@ export class ChatsService {
       console.error('[sendMessage] Firebase push failed (continuing):', e);
     }
 
-    return dbMsg;
+    const participants = await (this.repo as any).listParticipants(chatId);
+    return { message: dbMsg, participants };
   }
 }

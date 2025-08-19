@@ -28,7 +28,7 @@ chatsRouter.get(
     const userId = c.req.header('x-user-id');
     if (!userId) return c.json({ error: 'x-user-id header required' }, 400);
     const id = c.req.param('id');
-    const item = await Container.get(ChatsService).getRoomV2(id);
+    const item = await Container.get(ChatsService).getRoomV2WithParticipants(id);
     if (!item) return c.json({ error: 'Not found' }, 404);
     return c.json(item);
   }
@@ -45,8 +45,8 @@ chatsRouter.post(
     const chatId = c.req.param('id');
     const { text } = c.req.valid('json');
     try {
-      const msg = await Container.get(ChatsService).sendMessage(chatId, userId, text);
-      return c.json(msg, 201);
+      const payload = await Container.get(ChatsService).sendMessage(chatId, userId, text);
+      return c.json(payload, 201);
     } catch (e) {
       return c.json({ error: (e as Error).message }, 400);
     }
