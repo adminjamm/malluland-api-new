@@ -17,16 +17,18 @@ export class ChatsService {
     this.usersRepo = Container.get(UsersRepository);
   }
 
-  listRooms(userId: string, page: number): Promise<ChatRoomListItem[]> {
+  async listRooms(userId: string, page: number): Promise<{ items: ChatRoomListItem[]; total: number; pageSize: number }> {
     const limit = 20;
     const offset = (page - 1) * limit;
-    return this.repo.listRoomsForUser(userId, limit, offset);
+    const { items, total } = await (this.repo as any).listRoomsForUserWithTotal(userId, limit, offset);
+    return { items, total, pageSize: limit };
   }
 
-  listRoomsV2(userId: string, page: number, pageSize = 20): Promise<any[]> {
+  async listRoomsV2(userId: string, page: number, pageSize = 20): Promise<{ items: any[]; total: number; pageSize: number }> {
     const limit = pageSize;
     const offset = (page - 1) * limit;
-    return this.repo.listRoomsV2(userId, limit, offset);
+    const { items, total } = await (this.repo as any).listRoomsV2WithTotal(userId, limit, offset);
+    return { items, total, pageSize: limit };
   }
 
   getRoomV2(id: string): Promise<any | null> {

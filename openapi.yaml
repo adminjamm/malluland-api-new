@@ -489,6 +489,8 @@ paths:
                     type: integer
                   pageSize:
                     type: integer
+                  total:
+                    type: integer
                   items:
                     type: array
                     items:
@@ -558,9 +560,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  page: { type: integer }
-                  pageSize: { type: integer }
-                  items:
+                  data:
                     type: array
                     items:
                       type: object
@@ -577,6 +577,12 @@ paths:
                         meetup_creator_avatar: { type: string, nullable: true }
                         dm_requestor_avatar: { type: string, nullable: true }
                         dm_creator_avatar: { type: string, nullable: true }
+                  metadata:
+                    type: object
+                    properties:
+                      count: { type: integer }
+                      page: { type: integer }
+                      size: { type: integer }
         '401': { description: Unauthorized }
   /chats/rooms/{id}/send:
     post:

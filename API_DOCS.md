@@ -123,6 +123,7 @@ Response 200:
 {
   "page": 1,
   "pageSize": 20,
+  "total": 123,
   "items": [
     {
       "id": "uuid",
@@ -135,7 +136,8 @@ Response 200:
       "last_message_at": "ISO date|null",
       "participant_user_ids": ["uuid", "uuid"]
     }
-  ]
+  ],
+  "metadata": { "count": 123, "page": 1, "size": 10 }
 }
 
 ### GET /chats/v2/rooms
@@ -147,9 +149,7 @@ Query params:
 
 Response 200:
 {
-  "page": 1,
-  "pageSize": 10,
-  "items": [
+  "data": [
     {
       "id": "uuid",
       "type": "DM|meetup",

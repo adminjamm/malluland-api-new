@@ -40,8 +40,22 @@ export class ChatsRepository {
   private get db(): Db { return Container.get('db'); }
 
   async listRoomsForUser(userId: string, limit: number, offset: number): Promise<ChatRoomListItem[]> {
-    // Use a single SQL to fetch rooms where the user participates, latest message, unread count, participant ids,
-    // plus meetup and host details for meetup-type rooms.
+    const { items } = await this.listRoomsForUserWithTotal(userId, limit, offset);
+    return items;
+  }
+
+  async listRoomsForUserWithTotal(userId: string, limit: number, offset: number): Promise<{ items: ChatRoomListItem[]; total: number }> {
+    // Total count with same base filters (exclude joins and ordering)
+    const countQ = sql`
+      SELECT COUNT(*)::bigint AS total
+      FROM chat_rooms r
+      INNER JOIN chat_room_participants p
+        ON p.chat_room_id = r.id AND p.user_id = ${userId}
+    `;
+    const countRes: any = await this.db.execute(countQ);
+    const total = Number((Array.isArray(countRes) ? countRes[0].total : countRes.rows[0].total) || 0);
+
+    // Paged query with joins
     const q = sql`
       SELECT
         r.id,
@@ -90,8 +104,7 @@ export class ChatsRepository {
     `;
     const res = await this.db.execute(q);
     const rows = (Array.isArray(res) ? (res as any) : (res as any).rows) as any[];
-    // Normalize types and ensure participant_user_ids is string[]
-    return rows.map((r) => ({
+    const items: ChatRoomListItem[] = rows.map((r) => ({
       id: r.id,
       type: r.type,
       meetup_id: r.meetup_id ?? null,
@@ -120,11 +133,51 @@ export class ChatsRepository {
         : null,
       host: r.host__id ? { id: String(r.host__id), name: r.host__name ?? null } : null,
     }));
+
+    return { items, total };
   }
 
-  async listRoomsV2(userId: string, limit: number, offset: number): Promise<any[]> {
-    console.log('listRoomsV2 called with userId:', userId, 'limit:', limit, 'offset:', offset);
-    const q = sql`
+  async listRoomsV2WithTotal(userId: string, limit: number, offset: number): Promise<{ items: any[]; total: number }> {
+    // total count (no offset/limit)
+    const countQ = sql`
+      WITH filtered_chatrooms AS (
+        SELECT cr.*
+        FROM chat_rooms cr 
+        WHERE 
+          cr.deleted_at IS NULL
+          AND EXISTS (
+            SELECT 1 FROM chat_room_participants crp 
+            WHERE crp.chat_room_id = cr.id
+              AND crp.user_id = ${userId}
+              AND crp.status = 'active'
+          )
+          AND (
+            SELECT COUNT(*) FROM chat_room_participants crp 
+            WHERE crp.chat_room_id = cr.id
+          ) > 1
+          AND (
+            cr.type != 'DM'
+            OR NOT EXISTS (
+              SELECT 1 
+              FROM chat_room_participants crp1 
+              JOIN chat_room_participants crp2 ON 
+                crp1.chat_room_id = crp2.chat_room_id 
+                AND crp1.user_id != crp2.user_id 
+              JOIN blocked_user bu ON 
+                (bu.user_id = crp1.user_id AND bu.blocked_user_id = crp2.user_id)
+                OR 
+                (bu.user_id = crp2.user_id AND bu.blocked_user_id = crp1.user_id)
+              WHERE crp1.chat_room_id = cr.id
+            )
+          )
+      )
+      SELECT COUNT(*)::bigint AS total FROM filtered_chatrooms
+    `;
+    const countRes: any = await this.db.execute(countQ);
+    const total = Number((Array.isArray(countRes) ? countRes[0]?.total : countRes.rows?.[0]?.total) || 0);
+
+    // items with offset/limit
+    const itemsQ = sql`
       WITH filtered_chatrooms AS (
         SELECT cr.*
         FROM chat_rooms cr 
@@ -217,10 +270,16 @@ export class ChatsRepository {
         LIMIT 1
       ) m_avatar ON TRUE
     `;
-    const res = await this.db.execute(q);
-    console.log('listRoomsV2 result:', res);
-    const rows = (Array.isArray(res) ? (res as any) : (res as any).rows) as any[];
-    return rows;
+    const itemsRes = await this.db.execute(itemsQ);
+    const items = (Array.isArray(itemsRes) ? (itemsRes as any) : (itemsRes as any).rows) as any[];
+
+    return { items, total };
+  }
+
+  // Backward-compatible wrapper in case any callers still use listRoomsV2 directly
+  async listRoomsV2(userId: string, limit: number, offset: number): Promise<any[]> {
+    const { items } = await this.listRoomsV2WithTotal(userId, limit, offset);
+    return items;
   }
 
   async getRoomDetailsV2(id: string): Promise<any | null> {

@@ -15,8 +15,8 @@ chatsRouter.get(
     const { page } = c.req.valid('query');
     const userId = c.req.header('x-user-id');
     if (!userId) return c.json({ error: 'x-user-id header required' }, 400);
-    const items = await Container.get(ChatsService).listRooms(userId, page);
-    return c.json({ page, pageSize: 20, items });
+    const { items, total, pageSize } = await Container.get(ChatsService).listRooms(userId, page);
+    return c.json({ page, pageSize, total, items });
   }
 );
 
@@ -63,7 +63,7 @@ chatsRouter.get(
     const userId = c.req.header('x-user-id');
     if (!userId) return c.json({ error: 'x-user-id header required' }, 400);
     const limit = pageSize;
-    const items = await Container.get(ChatsService).listRoomsV2(userId, page, limit);
-    return c.json({ page, pageSize: limit, items });
+    const { items, total } = await Container.get(ChatsService).listRoomsV2(userId, page, limit);
+    return c.json({ data: items, metadata: { count: total, page, size: limit } });
   }
 );
