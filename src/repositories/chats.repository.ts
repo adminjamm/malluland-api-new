@@ -1,12 +1,13 @@
-import { Service, Container } from 'typedi';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { sql } from 'drizzle-orm';
+import { Service, Container } from "typedi";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { and, eq, sql } from "drizzle-orm";
+import { chatRoomParticipants } from "../db/schema";
 
 export type Db = NodePgDatabase;
 
 export type ChatRoomListItem = {
   id: string;
-  type: 'DM' | 'meetup';
+  type: "DM" | "meetup";
   meetup_id: string | null;
   unread_count: number | null;
   last_message_id: string | null;
@@ -37,14 +38,28 @@ export type ChatRoomListItem = {
 
 @Service()
 export class ChatsRepository {
-  private get db(): Db { return Container.get('db'); }
+  private get db(): Db {
+    return Container.get("db");
+  }
 
-  async listRoomsForUser(userId: string, limit: number, offset: number): Promise<ChatRoomListItem[]> {
-    const { items } = await this.listRoomsForUserWithTotal(userId, limit, offset);
+  async listRoomsForUser(
+    userId: string,
+    limit: number,
+    offset: number
+  ): Promise<ChatRoomListItem[]> {
+    const { items } = await this.listRoomsForUserWithTotal(
+      userId,
+      limit,
+      offset
+    );
     return items;
   }
 
-  async listRoomsForUserWithTotal(userId: string, limit: number, offset: number): Promise<{ items: ChatRoomListItem[]; total: number }> {
+  async listRoomsForUserWithTotal(
+    userId: string,
+    limit: number,
+    offset: number
+  ): Promise<{ items: ChatRoomListItem[]; total: number }> {
     // Total count with same base filters (exclude joins and ordering)
     const countQ = sql`
       SELECT COUNT(*)::bigint AS total
@@ -53,7 +68,10 @@ export class ChatsRepository {
         ON p.chat_room_id = r.id AND p.user_id = ${userId}
     `;
     const countRes: any = await this.db.execute(countQ);
-    const total = Number((Array.isArray(countRes) ? countRes[0].total : countRes.rows[0].total) || 0);
+    const total = Number(
+      (Array.isArray(countRes) ? countRes[0].total : countRes.rows[0].total) ||
+        0
+    );
 
     // Paged query with joins
     const q = sql`
@@ -103,7 +121,9 @@ export class ChatsRepository {
       LIMIT ${limit} OFFSET ${offset}
     `;
     const res = await this.db.execute(q);
-    const rows = (Array.isArray(res) ? (res as any) : (res as any).rows) as any[];
+    const rows = (
+      Array.isArray(res) ? (res as any) : (res as any).rows
+    ) as any[];
     const items: ChatRoomListItem[] = rows.map((r) => ({
       id: r.id,
       type: r.type,
@@ -113,7 +133,9 @@ export class ChatsRepository {
       last_message_kind: r.last_message_kind ?? null,
       last_message_body: r.last_message_body ?? null,
       last_message_at: r.last_message_at ?? null,
-      participant_user_ids: (r.participant_user_ids || []).map((x: any) => String(x)),
+      participant_user_ids: (r.participant_user_ids || []).map((x: any) =>
+        String(x)
+      ),
       meetup: r.meetup__id
         ? {
             id: String(r.meetup__id),
@@ -126,18 +148,28 @@ export class ChatsRepository {
             country: r.meetup__country ?? null,
             activity_id: r.meetup__activity_id ?? null,
             who_pays: r.meetup__who_pays ?? null,
-            fee_amount: r.meetup__fee_amount != null ? String(r.meetup__fee_amount) : null,
+            fee_amount:
+              r.meetup__fee_amount != null
+                ? String(r.meetup__fee_amount)
+                : null,
             guests: r.meetup__guests ?? null,
             host_id: r.meetup__host_id ?? null,
           }
         : null,
-      host: r.host__id ? { id: String(r.host__id), name: r.host__name ?? null } : null,
+      host: r.host__id
+        ? { id: String(r.host__id), name: r.host__name ?? null }
+        : null,
     }));
 
     return { items, total };
   }
 
-  async listRoomsV2WithTotal(userId: string, limit: number, offset: number): Promise<{ items: any[]; total: number }> {
+  async listRoomsV2WithTotal(
+    userId: string,
+    status: string,
+    limit: number,
+    offset: number
+  ): Promise<{ items: any[]; total: number }> {
     // total count (no offset/limit)
     const countQ = sql`
       WITH filtered_chatrooms AS (
@@ -149,7 +181,7 @@ export class ChatsRepository {
             SELECT 1 FROM chat_room_participants crp 
             WHERE crp.chat_room_id = cr.id
               AND crp.user_id = ${userId}
-              AND crp.status = 'active'
+              AND crp.status = ${status}
           )
           AND (
             SELECT COUNT(*) FROM chat_room_participants crp 
@@ -174,7 +206,11 @@ export class ChatsRepository {
       SELECT COUNT(*)::bigint AS total FROM filtered_chatrooms
     `;
     const countRes: any = await this.db.execute(countQ);
-    const total = Number((Array.isArray(countRes) ? countRes[0]?.total : countRes.rows?.[0]?.total) || 0);
+    const total = Number(
+      (Array.isArray(countRes)
+        ? countRes[0]?.total
+        : countRes.rows?.[0]?.total) || 0
+    );
 
     // items with offset/limit
     const itemsQ = sql`
@@ -187,7 +223,7 @@ export class ChatsRepository {
             SELECT 1 FROM chat_room_participants crp 
             WHERE crp.chat_room_id = cr.id
               AND crp.user_id = ${userId}
-              AND crp.status = 'active'
+              AND crp.status = ${status}
           )
           AND (
             SELECT COUNT(*) FROM chat_room_participants crp 
@@ -271,18 +307,33 @@ export class ChatsRepository {
       ) m_avatar ON TRUE
     `;
     const itemsRes = await this.db.execute(itemsQ);
-    const items = (Array.isArray(itemsRes) ? (itemsRes as any) : (itemsRes as any).rows) as any[];
+    const items = (
+      Array.isArray(itemsRes) ? (itemsRes as any) : (itemsRes as any).rows
+    ) as any[];
 
     return { items, total };
   }
 
   // Backward-compatible wrapper in case any callers still use listRoomsV2 directly
-  async listRoomsV2(userId: string, limit: number, offset: number): Promise<any[]> {
-    const { items } = await this.listRoomsV2WithTotal(userId, limit, offset);
+  async listRoomsV2(
+    userId: string,
+    limit: number,
+    offset: number
+  ): Promise<any[]> {
+    const { items } = await this.listRoomsV2WithTotal(
+      userId,
+      "active",
+      limit,
+      offset
+    );
     return items;
   }
 
-  async listParticipants(chatId: string): Promise<Array<{ userId: string; name: string | null; avatarUrl: string | null }>> {
+  async listParticipants(
+    chatId: string
+  ): Promise<
+    Array<{ userId: string; name: string | null; avatarUrl: string | null }>
+  > {
     const q = sql`
       SELECT 
         p.user_id AS user_id,
@@ -297,11 +348,15 @@ export class ChatsRepository {
         ORDER BY ph.position ASC, ph.created_at DESC
         LIMIT 1
       ) up ON TRUE
-      WHERE p.chat_room_id = ${chatId} AND p.status = 'active'
+      WHERE p.chat_room_id = ${chatId} AND p.status = 'active' OR p.status = 'archived'
     `;
     const res: any = await this.db.execute(q);
     const rows = Array.isArray(res) ? res : res.rows;
-    return (rows || []).map((r: any) => ({ userId: String(r.user_id), name: r.name ?? null, avatarUrl: r.avatar_url ?? null }));
+    return (rows || []).map((r: any) => ({
+      userId: String(r.user_id),
+      name: r.name ?? null,
+      avatarUrl: r.avatar_url ?? null,
+    }));
   }
 
   async getRoomDetailsV2(id: string): Promise<any | null> {
@@ -314,7 +369,9 @@ export class ChatsRepository {
         cr.updated_at,
         cr.deleted_at,
         dmr_requestor.name as requestor_name,
+        dmr_requestor.id as requestor_id,
         dm_creator.name as dm_creator_name,
+        dm_creator.id as dm_creator_id,
         m.id AS meetup_id,
         m.host_id AS meetup_host_id,
         m.name AS meetup_name,
@@ -366,5 +423,85 @@ export class ChatsRepository {
     const res: any = await this.db.execute(q);
     const rows = Array.isArray(res) ? res : res.rows;
     return rows && rows.length ? rows[0] : null;
+  }
+  async archiveChatRoom(userId: string, chatId: string) {
+    const [participant] = await this.db
+      .select()
+      .from(chatRoomParticipants)
+      .where(
+        and(
+          eq(chatRoomParticipants.chatRoomId, chatId),
+          eq(chatRoomParticipants.userId, userId)
+        )
+      )
+      .limit(1);
+
+    if (!participant) {
+      return null;
+    }
+
+    let newStatus: string;
+    if (participant.status === "active") {
+      newStatus = "archived";
+    } else {
+      newStatus = "active";
+    }
+
+    await this.db
+      .update(chatRoomParticipants)
+      .set({
+        status: newStatus,
+      })
+      .where(
+        and(
+          eq(chatRoomParticipants.chatRoomId, chatId),
+          eq(chatRoomParticipants.userId, userId)
+        )
+      );
+    return participant;
+  }
+  async archivedListRoomsTotal(userId: string): Promise<{ total: number }> {
+    const countQ = sql`
+      WITH filtered_chatrooms AS (
+        SELECT cr.*
+        FROM chat_rooms cr 
+        WHERE 
+          cr.deleted_at IS NULL
+          AND EXISTS (
+            SELECT 1 FROM chat_room_participants crp 
+            WHERE crp.chat_room_id = cr.id
+              AND crp.user_id = ${userId}
+              AND crp.status = 'archived'
+          )
+          AND (
+            SELECT COUNT(*) FROM chat_room_participants crp 
+            WHERE crp.chat_room_id = cr.id
+          ) > 1
+          AND (
+            cr.type != 'DM'
+            OR NOT EXISTS (
+              SELECT 1 
+              FROM chat_room_participants crp1 
+              JOIN chat_room_participants crp2 ON 
+                crp1.chat_room_id = crp2.chat_room_id 
+                AND crp1.user_id != crp2.user_id 
+              JOIN blocked_user bu ON 
+                (bu.user_id = crp1.user_id AND bu.blocked_user_id = crp2.user_id)
+                OR 
+                (bu.user_id = crp2.user_id AND bu.blocked_user_id = crp1.user_id)
+              WHERE crp1.chat_room_id = cr.id
+            )
+          )
+      )
+      SELECT COUNT(*)::bigint AS total FROM filtered_chatrooms
+    `;
+    const countRes: any = await this.db.execute(countQ);
+    const total = Number(
+      (Array.isArray(countRes)
+        ? countRes[0]?.total
+        : countRes.rows?.[0]?.total) || 0
+    );
+
+    return { total };
   }
 }

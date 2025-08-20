@@ -15,7 +15,7 @@ import {
 import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { authIdentities, users } from "../db/schema";
-// import { firebaseRtdb } from "@/api/utils/firebase";
+import { firebaseRtdb } from "../utils/firebase";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 // import { lookupIp, type IpInfoResponse } from "../utils/ip";
@@ -170,17 +170,15 @@ async function handleOAuthCallback({
       return newUser[0];
     });
 
-    // const usersRef = firebaseRtdb.ref(`users/${userInDb.id}`);
-    // await usersRef.set({
-    //   name: userInDb.name,
-    //   username: userInDb.username,
-    //   unreadCounts: {
-    //     chats: {},
-    //     notifications: 0,
-    //     requests: 0,
-    //     follows: 0,
-    //   },
-    // });
+    const usersRef = firebaseRtdb.ref(`users/${userInDb.id}`);
+    await usersRef.set({
+      name: userInDb.name,
+      unreadCounts: {
+        chats: {},
+        requests: 0,
+        meetups: 0,
+      },
+    });
   }
 
   // linking of the primary and secondary dummy account needs
@@ -234,7 +232,7 @@ async function handleOAuthCallback({
   //     })
   //     .returning();
 
-  const { jwttoken } = await generateAuthTokens(
+  const { jwttoken, firebasetoken } = await generateAuthTokens(
     userInDb!
     // newSession[0].id
   );
@@ -243,7 +241,7 @@ async function handleOAuthCallback({
 
   const url = new URL(callbackUrl);
   url.searchParams.set("token", jwttoken);
-  //   url.searchParams.set("firebasetoken", firebasetoken);
+  url.searchParams.set("firebasetoken", firebasetoken);
   url.searchParams.set("new_account", String(new_account));
 
   //   if (isDummyProfileOnboardingComplete) {

@@ -1,0 +1,17 @@
+meta {
+  name: GET chat rooms archived total
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base_url}}/chats/rooms/archived/total
+  body: none
+  auth: none
+}
+
+headers {
+  x-user-id: 9a3711ff-4b7d-4811-bb16-b70937338e8f
+  Content-Type: application/json
+  ~Authorization: Bearer {{JWT}}
+}

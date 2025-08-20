@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { users } from "../db/schema";
-// import { firebaseAuth } from "./firebase";
+import { firebaseAuth } from "./firebase";
 import { decodeBase64IgnorePadding } from "@oslojs/encoding";
 import { Google, Apple, generateCodeVerifier, decodeIdToken } from "arctic";
 import type { JwtPayload } from "../types";
@@ -132,7 +132,7 @@ export const generateAuthTokens = async (
   // sessionId: string,
   isDummyAccount = false
 ) => {
-  // const firebasetoken = await firebaseAuth.createCustomToken(profile.id);
+  const firebasetoken = await firebaseAuth.createCustomToken(user.id);
   const jwtPayload: JwtPayload = {
     id: user.id,
     name: user.name!,
@@ -143,7 +143,7 @@ export const generateAuthTokens = async (
   });
 
   return {
-    // firebasetoken,
+    firebasetoken,
     jwttoken,
   };
 };

@@ -5,9 +5,15 @@ meta {
 }
 
 get {
-  url: {{base_url}}/chats/v2/rooms?page=1&pageSize=10
+  url: {{base_url}}/chats/v2/rooms?page=1&pageSize=10&status=active
   body: none
   auth: none
+}
+
+params:query {
+  page: 1
+  pageSize: 10
+  status: active
 }
 
 headers {
