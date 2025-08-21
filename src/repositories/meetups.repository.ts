@@ -1,7 +1,24 @@
-import { Service, Container } from 'typedi';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { meetups, users as usersTable, meetupRequests, meetupAttendees } from '../db/schema';
-import { and, asc, between, desc, eq, gt, gte, lt, lte, ne, sql } from 'drizzle-orm';
+import { Service, Container } from "typedi";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import {
+  meetups,
+  users as usersTable,
+  meetupRequests,
+  meetupAttendees,
+} from "../db/schema";
+import {
+  and,
+  asc,
+  between,
+  desc,
+  eq,
+  gt,
+  gte,
+  lt,
+  lte,
+  ne,
+  sql,
+} from "drizzle-orm";
 
 export type Db = NodePgDatabase;
 
@@ -10,23 +27,48 @@ export type TimeRange = { start?: Date; end?: Date };
 @Service()
 export class MeetupsRepository {
   private get db(): Db {
-    return Container.get('db');
+    return Container.get("db");
   }
 
-  listInRange({ range, limit, offset, onlyActive = true, city, activityId, excludeHostId, requestUserId }: { range: TimeRange; limit: number; offset: number; onlyActive?: boolean; city?: string; activityId?: number; excludeHostId?: string; requestUserId?: string }) {
+  listInRange({
+    range,
+    limit,
+    offset,
+    onlyActive = true,
+    city,
+    activityId,
+    excludeHostId,
+    requestUserId,
+  }: {
+    range: TimeRange;
+    limit: number;
+    offset: number;
+    onlyActive?: boolean;
+    city?: string;
+    activityId?: number;
+    excludeHostId?: string;
+    requestUserId?: string;
+  }) {
     // Use raw SQL to support LEFT JOIN LATERAL for host avatar selection
     const whereClauses: any[] = [];
     const startIso = range.start ? range.start.toISOString() : undefined;
     const endIso = range.end ? range.end.toISOString() : undefined;
     if (onlyActive) whereClauses.push(sql`m.meetup_status = 'active'`);
-    if (startIso && endIso) whereClauses.push(sql`m.starts_at BETWEEN ${startIso}::timestamptz AND ${endIso}::timestamptz`);
-    else if (startIso) whereClauses.push(sql`m.starts_at > ${startIso}::timestamptz`);
-    else if (endIso) whereClauses.push(sql`m.starts_at < ${endIso}::timestamptz`);
+    if (startIso && endIso)
+      whereClauses.push(
+        sql`m.starts_at BETWEEN ${startIso}::timestamptz AND ${endIso}::timestamptz`
+      );
+    else if (startIso)
+      whereClauses.push(sql`m.starts_at > ${startIso}::timestamptz`);
+    else if (endIso)
+      whereClauses.push(sql`m.starts_at < ${endIso}::timestamptz`);
     if (city) whereClauses.push(sql`m.city = ${city}`);
     if (activityId) whereClauses.push(sql`m.activity_id = ${activityId}`);
     if (excludeHostId) whereClauses.push(sql`m.host_id <> ${excludeHostId}`);
 
-    const whereSql = whereClauses.length ? sql`WHERE ${sql.join(whereClauses, sql` AND `)}` : sql``;
+    const whereSql = whereClauses.length
+      ? sql`WHERE ${sql.join(whereClauses, sql` AND `)}`
+      : sql``;
 
     // Compute isRequested expression safely (avoid untyped NULL params)
     const isRequestedExpr = requestUserId
@@ -69,10 +111,24 @@ export class MeetupsRepository {
     return this.db.execute(query) as any;
   }
 
-  listByHost({ hostId, includePast, now, limit, offset }: { hostId: string; includePast?: boolean; now: Date; limit: number; offset: number }) {
+  listByHost({
+    hostId,
+    includePast,
+    now,
+    limit,
+    offset,
+  }: {
+    hostId: string;
+    includePast?: boolean;
+    now: Date;
+    limit: number;
+    offset: number;
+  }) {
     // Include host avatar in the response as well for consistency
     const nowIso = now.toISOString();
-    const timeClause = includePast ? sql`` : sql`AND m.starts_at > ${nowIso}::timestamptz`;
+    const timeClause = includePast
+      ? sql``
+      : sql`AND m.starts_at > ${nowIso}::timestamptz`;
     const query = sql`
       SELECT
         m.id,
@@ -109,17 +165,44 @@ export class MeetupsRepository {
     return this.db.execute(query) as any;
   }
 
-  create(hostId: string, data: Omit<typeof meetups.$inferInsert, 'id' | 'hostId' | 'createdAt' | 'updatedAt' | 'chatRoomId'>, chatRoomId?: string) {
-    const row = { ...(data as any), hostId, chatRoomId: chatRoomId ?? null, id: crypto.randomUUID(), createdAt: new Date(), updatedAt: new Date(), meetupStatus: 'active' } as any;
+  create(
+    hostId: string,
+    data: Omit<
+      typeof meetups.$inferInsert,
+      "id" | "hostId" | "createdAt" | "updatedAt" | "chatRoomId"
+    >,
+    chatRoomId?: string
+  ) {
+    const row = {
+      ...(data as any),
+      hostId,
+      chatRoomId: chatRoomId ?? null,
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      meetupStatus: "active",
+    } as any;
     return this.db.insert(meetups).values(row).returning();
   }
 
-  update(id: string, hostId: string, data: Partial<typeof meetups.$inferInsert>) {
-    return this.db.update(meetups).set({ ...(data as any), updatedAt: new Date() } as any).where(and(eq(meetups.id, id), eq(meetups.hostId, hostId))).returning();
+  update(
+    id: string,
+    hostId: string,
+    data: Partial<typeof meetups.$inferInsert>
+  ) {
+    return this.db
+      .update(meetups)
+      .set({ ...(data as any), updatedAt: new Date() } as any)
+      .where(and(eq(meetups.id, id), eq(meetups.hostId, hostId)))
+      .returning();
   }
 
   softDelete(id: string, hostId: string) {
-    return this.db.update(meetups).set({ meetupStatus: 'deleted', updatedAt: new Date() } as any).where(and(eq(meetups.id, id), eq(meetups.hostId, hostId))).returning();
+    return this.db
+      .update(meetups)
+      .set({ meetupStatus: "deleted", updatedAt: new Date() } as any)
+      .where(and(eq(meetups.id, id), eq(meetups.hostId, hostId)))
+      .returning();
   }
 
   getById(id: string) {
@@ -169,15 +252,31 @@ export class MeetupsRepository {
   }
 
   listAttendees(meetupId: string) {
-    return this.db.select().from(meetupAttendees).where(eq(meetupAttendees.meetupId, meetupId));
+    return this.db
+      .select()
+      .from(meetupAttendees)
+      .where(eq(meetupAttendees.meetupId, meetupId));
   }
 
   getRequestById(id: string) {
-    return this.db.select().from(meetupRequests).where(eq(meetupRequests.id, id)).limit(1);
+    return this.db
+      .select()
+      .from(meetupRequests)
+      .where(eq(meetupRequests.id, id))
+      .limit(1);
   }
 
   async hasExistingRequest(meetupId: string, senderUserId: string) {
-    const rows = await this.db.select({ id: meetupRequests.id }).from(meetupRequests).where(and(eq(meetupRequests.meetupId, meetupId), eq(meetupRequests.senderUserId, senderUserId))).limit(1);
+    const rows = await this.db
+      .select({ id: meetupRequests.id })
+      .from(meetupRequests)
+      .where(
+        and(
+          eq(meetupRequests.meetupId, meetupId),
+          eq(meetupRequests.senderUserId, senderUserId)
+        )
+      )
+      .limit(1);
     return rows.length > 0;
   }
 
@@ -191,15 +290,29 @@ export class MeetupsRepository {
     return this.db
       .select({ id: meetupRequests.id })
       .from(meetupRequests)
-      .where(and(eq(meetupRequests.senderUserId, senderUserId), gte(meetupRequests.createdAt, start), lte(meetupRequests.createdAt, end)));
+      .where(
+        and(
+          eq(meetupRequests.senderUserId, senderUserId),
+          gte(meetupRequests.createdAt, start),
+          lte(meetupRequests.createdAt, end)
+        )
+      );
   }
 
   approveRequest(id: string) {
-    return this.db.update(meetupRequests).set({ status: 'accepted', updatedAt: new Date() } as any).where(eq(meetupRequests.id, id)).returning();
+    return this.db
+      .update(meetupRequests)
+      .set({ status: "accepted", updatedAt: new Date() } as any)
+      .where(eq(meetupRequests.id, id))
+      .returning();
   }
 
   declineRequest(id: string) {
-    return this.db.update(meetupRequests).set({ status: 'declined', updatedAt: new Date() } as any).where(eq(meetupRequests.id, id)).returning();
+    return this.db
+      .update(meetupRequests)
+      .set({ status: "declined", updatedAt: new Date() } as any)
+      .where(eq(meetupRequests.id, id))
+      .returning();
   }
 
   setRequestChatRoom(id: string, chatRoomId: string) {
@@ -211,17 +324,41 @@ export class MeetupsRepository {
   }
 
   addAttendee(meetupId: string, senderUserId: string) {
-    const row = { id: crypto.randomUUID(), meetupId, senderUserId, chatRoomId: crypto.randomUUID(), createdAt: new Date(), updatedAt: new Date() } as any;
+    const row = {
+      id: crypto.randomUUID(),
+      meetupId,
+      senderUserId,
+      chatRoomId: crypto.randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any;
     return this.db.insert(meetupAttendees).values(row).returning();
   }
 
-  addAttendeeWithChatRoomId(meetupId: string, senderUserId: string, chatRoomId: string) {
-    const row = { id: crypto.randomUUID(), meetupId, senderUserId, chatRoomId, createdAt: new Date(), updatedAt: new Date() } as any;
+  addAttendeeWithChatRoomId(
+    meetupId: string,
+    senderUserId: string,
+    chatRoomId: string
+  ) {
+    const row = {
+      id: crypto.randomUUID(),
+      meetupId,
+      senderUserId,
+      chatRoomId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any;
     return this.db.insert(meetupAttendees).values(row).returning();
   }
 
   listSentRequests(userId: string, limit: number, offset: number) {
-    return this.db.select().from(meetupRequests).where(eq(meetupRequests.senderUserId, userId)).orderBy(desc(meetupRequests.createdAt)).limit(limit).offset(offset);
+    return this.db
+      .select()
+      .from(meetupRequests)
+      .where(eq(meetupRequests.senderUserId, userId))
+      .orderBy(desc(meetupRequests.createdAt))
+      .limit(limit)
+      .offset(offset);
   }
 
   listReceivedRequests(hostId: string, limit: number, offset: number) {
@@ -243,5 +380,15 @@ export class MeetupsRepository {
       .limit(limit)
       .offset(offset);
   }
+  removeAttendee(meetupId: string, userId: string) {
+    return this.db
+      .delete(meetupAttendees)
+      .where(
+        and(
+          eq(meetupAttendees.meetupId, meetupId),
+          eq(meetupAttendees.senderUserId, userId)
+        )
+      )
+      .returning();
+  }
 }
-

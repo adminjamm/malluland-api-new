@@ -1,6 +1,20 @@
 import { z } from "zod";
 import "dotenv/config";
 
+const firebaseConfigSchema = z.object({
+  type: z.string().min(1),
+  project_id: z.string().min(1),
+  private_key_id: z.string().min(1),
+  private_key: z.string().min(1),
+  client_email: z.string().min(1),
+  client_id: z.string().min(1),
+  auth_uri: z.string().min(1),
+  token_uri: z.string().min(1),
+  auth_provider_x509_cert_url: z.string().min(1),
+  client_x509_cert_url: z.string().min(1),
+  universe_domain: z.string().min(1),
+});
+
 const schema = z.object({
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(["development", "production"]),
@@ -28,6 +42,16 @@ const schema = z.object({
   S3_BUCKET: z.string().optional(),
   // LocationIQ
   LOCATIONIQ_API_KEY: z.string().optional(),
+  FIREBASE_SERVICE_ACCOUNT: z.string().transform((str) => {
+    try {
+      const parsed = JSON.parse(str);
+      return firebaseConfigSchema.parse(parsed);
+    } catch (e) {
+      console.log(e);
+      throw new Error(`Invalid Firebase config JSON`);
+    }
+  }),
+  FIREBASE_DATABASE_URL: z.string().min(1),
 });
 
 const parsed = schema.parse({
@@ -53,6 +77,8 @@ const parsed = schema.parse({
   AWS_SECRET_ACCESS_KEY: process.env.AWS_BUCKET_SECRET_KEY,
   S3_BUCKET: process.env.AWS_BUCKET_NAME,
   LOCATIONIQ_API_KEY: process.env.LOCATIONIQ_API_KEY,
+  FIREBASE_DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
+  FIREBASE_SERVICE_ACCOUNT: process.env.FIREBASE_SERVICE_ACCOUNT,
 });
 
 export const env = {

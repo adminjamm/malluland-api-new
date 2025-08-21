@@ -1,0 +1,17 @@
+meta {
+  name: POST archive chat room
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/chats/rooms/8d850fa0-46ad-4446-873f-8cbf832a0659/toggle-archive
+  body: none
+  auth: none
+}
+
+headers {
+  x-user-id: 85c675b6-8582-4c30-b57b-ebfb3a21410a
+  Content-Type: application/json
+  ~Authorization: Bearer {{JWT}}
+}

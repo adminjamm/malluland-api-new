@@ -1,0 +1,25 @@
+meta {
+  name: Meetups: remove participant
+  type: http
+  seq: 15
+}
+
+delete {
+  url: {{endpoint}}/meetups/0d560977-79f3-4c68-977d-3f18ff2dd4cb/remove-participant
+  body: json
+  auth: inherit
+}
+
+headers {
+  x-user-id: 85c675b6-8582-4c30-b57b-ebfb3a21410a
+}
+
+body:json {
+  {
+    "participantId":"9a3711ff-4b7d-4811-bb16-b70937338e8f"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
