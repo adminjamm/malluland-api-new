@@ -201,4 +201,18 @@ export class FirebaseHelper {
       throw new Error("Failed to add chat message in Firebase");
     }
   }
+
+  async removeParticipant(chatId: string, userId: string) {
+    try {
+      const db = this.getRTDB();
+      const participantRef = db.ref(
+        `/chatRooms/${chatId}/participants/${userId}`
+      );
+      await participantRef.remove();
+      return true;
+    } catch (error) {
+      console.error("Error removing participant from Firebase:", error);
+      throw new Error("Failed to remove participant from Firebase");
+    }
+  }
 }
