@@ -16,7 +16,7 @@ chatsRouter.get(
   ),
   async (c) => {
     const { page } = c.req.valid("query");
-    const userId = c.req.header("x-user-id");
+    const userId = c.get("profile").id;
     if (!userId) return c.json({ error: "x-user-id header required" }, 400);
     const { items, total, pageSize } = await Container.get(
       ChatsService
@@ -30,7 +30,7 @@ chatsRouter.get(
   "/v2/rooms/:id",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header("x-user-id");
+    const userId = c.get("profile").id;
     if (!userId) return c.json({ error: "x-user-id header required" }, 400);
     const id = c.req.param("id");
     const item = await Container.get(ChatsService).getRoomV2WithParticipants(
@@ -47,7 +47,7 @@ chatsRouter.post(
   authorize({ bypassOnboardingCheck: true }),
   zValidator("json", z.object({ text: z.string().min(1) })),
   async (c) => {
-    const userId = c.req.header("x-user-id");
+    const userId = c.get("profile").id;
     if (!userId) return c.json({ error: "x-user-id header required" }, 400);
     const chatId = c.req.param("id");
     const { text } = c.req.valid("json");
@@ -78,7 +78,7 @@ chatsRouter.get(
   ),
   async (c) => {
     const { page, size, status } = c.req.valid("query");
-    const userId = c.req.header("x-user-id");
+    const userId = c.get("profile").id;
     if (!userId) return c.json({ error: "x-user-id header required" }, 400);
     const { items, total } = await Container.get(ChatsService).listRoomsV2(
       userId,
@@ -97,7 +97,7 @@ chatsRouter.post(
   "/rooms/:id/toggle-archive",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header("x-user-id");
+    const userId = c.get("profile").id;
     if (!userId) return c.json({ error: "x-user-id header required" }, 400);
     const chatId = c.req.param("id");
 
@@ -117,7 +117,7 @@ chatsRouter.get(
   "/rooms/archived/total",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const userId = c.req.header("x-user-id");
+    const userId = c.get("profile").id;
     if (!userId) return c.json({ error: "x-user-id header required" }, 400);
     const { data } = await Container.get(ChatsService).ArchivedListTotal(
       userId

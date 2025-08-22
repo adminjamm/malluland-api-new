@@ -5,8 +5,8 @@ import { Container } from "typedi";
 import { UsersService } from "../services/users.service";
 import { authorize } from "../middleware/auth";
 import { db } from "../db";
-import { userFavoritesText, userSelfie } from "../db/schema";
-import { desc, eq } from "drizzle-orm";
+import { bookmarks, userFavoritesText, userSelfie } from "../db/schema";
+import { and, desc, eq } from "drizzle-orm";
 
 export const usersRouter = new Hono();
 
@@ -506,9 +506,91 @@ usersRouter.get(
   "/:id",
   authorize({ bypassOnboardingCheck: true }),
   async (c) => {
-    const id = c.req.param("id");
-    const [row] = await svc().getUser(id);
-    if (!row) return c.json({ error: "Not found" }, 404);
-    return c.json(row);
+    const authUserId = c.get("profile").id;
+    const userId = c.req.param("id");
+
+    const [
+      [user],
+      photos,
+      selfies,
+      interests,
+      traits,
+      favoriteActors,
+      favoriteActresses,
+      favoritesText,
+      links,
+      userbookmarks,
+    ] = await Promise.all([
+      svc().getUser(userId),
+      await svc().listPhotos(userId),
+      svc().listSelfies(userId).orderBy(desc(userSelfie.createdAt)).limit(1),
+      svc().listInterests(userId),
+      svc().listTraits(userId),
+      svc().listFavoriteActors(userId),
+      svc().listFavoriteActresses(userId),
+      db
+        .select({
+          id: userFavoritesText.id,
+          category: userFavoritesText.category,
+          text: userFavoritesText.textValue,
+          position: userFavoritesText.position,
+        })
+        .from(userFavoritesText)
+        .where(eq(userFavoritesText.userId, userId)),
+      svc().listSocialLinks(userId),
+      db
+        .select()
+        .from(bookmarks)
+        .where(
+          and(
+            eq(bookmarks.bookmarkedUserId, userId),
+            eq(bookmarks.userId, authUserId)
+          )
+        ),
+    ]);
+
+    const avatar =
+      photos
+        .filter((p) => p.imageType === "avatar" && p.isActive === true)
+        .sort((a, b) =>
+          b.createdAt && a.createdAt
+            ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            : 0
+        )[0] || [];
+
+    const profilePhotos = photos.filter(
+      (p) => p.imageType === "photo" && p.isActive === true
+    );
+
+    const favoritesGrouped = favoritesText
+      .filter((item) => item.category !== null)
+      .reduce((acc, item) => {
+        const category = item.category!;
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(item);
+        return acc;
+      }, {} as Record<string, typeof favoritesText>);
+
+    if (!user) return c.json({ error: "Not found" }, 404);
+
+    const profileData = {
+      ...user,
+      age: computeAgeFromDob((user as any).dob ?? null),
+      photos: profilePhotos,
+      avatar,
+      selfie: selfies && selfies.length > 0 ? selfies[0] : null,
+      interests,
+      traits,
+      favoriteActors,
+      favoriteActresses,
+      favoritesGrouped,
+      socialLinks: links,
+      isBookmarked: userbookmarks.length > 0,
+    };
+    return c.json({
+      data: profileData,
+    });
   }
 );

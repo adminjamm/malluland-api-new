@@ -1,18 +1,22 @@
-import { Service, Container } from 'typedi';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { sql } from 'drizzle-orm';
-import { chatRequests } from '../db/schema';
+import { Service, Container } from "typedi";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { sql } from "drizzle-orm";
+import { chatRequests } from "../db/schema";
 
 export type Db = NodePgDatabase;
 
 export type RequestItem = {
-  kind: 'meetup' | 'chat';
+  kind: "meetup" | "chat";
   id: string;
   created_at: Date;
   status: string | null;
   // Common actor info
   sender_user_id?: string | null;
   sender_name?: string | null;
+  sender_dob?: string | null;
+  sender_company?: string | null;
+  sender_position?: string | null;
+  sender_avatar?: string | null;
   // Meetup-specific
   meetup_id?: string | null;
   meetup_name?: string | null;
@@ -24,9 +28,15 @@ export type RequestItem = {
 
 @Service()
 export class RequestsRepository {
-  private get db(): Db { return Container.get('db'); }
+  private get db(): Db {
+    return Container.get("db");
+  }
 
-  async listMeetupReceived(userId: string, limit: number, offset: number): Promise<RequestItem[]> {
+  async listMeetupReceived(
+    userId: string,
+    limit: number,
+    offset: number
+  ): Promise<RequestItem[]> {
     const q = sql`
       SELECT 'meetup'::text AS kind,
              mr.id,
@@ -34,23 +44,42 @@ export class RequestsRepository {
              mr.status,
              mr.sender_user_id AS sender_user_id,
              u.name AS sender_name,
+             u.dob AS sender_dob,
+             u.company AS sender_company,
+             u.position AS sender_position,
              m.id AS meetup_id,
              m.name AS meetup_name,
              NULL::uuid AS from_user_id,
              NULL::uuid AS to_user_id,
-             mr.message
+             mr.message,
+             up.original_url AS sender_avatar
       FROM meetup_requests mr
       INNER JOIN meetups m ON m.id = mr.meetup_id
       INNER JOIN users u ON u.id = mr.sender_user_id
-      WHERE m.host_id = ${userId}
+      LEFT JOIN LATERAL (
+        SELECT original_url
+        FROM user_photos
+        WHERE user_id = u.id
+          AND image_type = 'avatar'
+          AND is_active = true
+        ORDER BY created_at DESC
+        LIMIT 1
+      ) up ON true
+      WHERE m.host_id = ${userId} AND mr.status = 'pending'
       ORDER BY mr.created_at DESC, mr.id DESC
       LIMIT ${limit} OFFSET ${offset}
     `;
     const res = await this.db.execute(q);
-    return (Array.isArray(res) ? (res as any) : (res as any).rows) as RequestItem[];
+    return (
+      Array.isArray(res) ? (res as any) : (res as any).rows
+    ) as RequestItem[];
   }
 
-  async listChatReceived(userId: string, limit: number, offset: number): Promise<RequestItem[]> {
+  async listChatReceived(
+    userId: string,
+    limit: number,
+    offset: number
+  ): Promise<RequestItem[]> {
     const q = sql`
       SELECT 'chat'::text AS kind,
              cr.id,
@@ -58,22 +87,41 @@ export class RequestsRepository {
              cr.status,
              cr.from_user_id AS sender_user_id,
              u.name AS sender_name,
+             u.dob AS sender_dob,
+             u.company AS sender_company,
+             u.position AS sender_position,
              NULL::uuid AS meetup_id,
              NULL::text AS meetup_name,
              cr.from_user_id,
              cr.to_user_id,
-             cr.message
+             cr.message,
+             up.original_url AS sender_avatar
       FROM chat_requests cr
       INNER JOIN users u ON u.id = cr.from_user_id
-      WHERE cr.to_user_id = ${userId}
+      LEFT JOIN LATERAL (
+        SELECT original_url
+        FROM user_photos
+        WHERE user_id = u.id
+          AND image_type = 'avatar'
+          AND is_active = true
+        ORDER BY created_at DESC
+        LIMIT 1
+      ) up ON true
+      WHERE cr.to_user_id = ${userId} AND cr.status = 'pending'
       ORDER BY cr.created_at DESC, cr.id DESC
       LIMIT ${limit} OFFSET ${offset}
     `;
     const res = await this.db.execute(q);
-    return (Array.isArray(res) ? (res as any) : (res as any).rows) as RequestItem[];
+    return (
+      Array.isArray(res) ? (res as any) : (res as any).rows
+    ) as RequestItem[];
   }
 
-  async listChatSent(userId: string, limit: number, offset: number): Promise<RequestItem[]> {
+  async listChatSent(
+    userId: string,
+    limit: number,
+    offset: number
+  ): Promise<RequestItem[]> {
     const q = sql`
       SELECT 'chat'::text AS kind,
              cr.id,
@@ -93,12 +141,26 @@ export class RequestsRepository {
       LIMIT ${limit} OFFSET ${offset}
     `;
     const res = await this.db.execute(q);
-    return (Array.isArray(res) ? (res as any) : (res as any).rows) as RequestItem[];
+    return (
+      Array.isArray(res) ? (res as any) : (res as any).rows
+    ) as RequestItem[];
   }
 
-  async createChatRequest(fromUserId: string, toUserId: string, message: string) {
+  async createChatRequest(
+    fromUserId: string,
+    toUserId: string,
+    message: string
+  ) {
     const now = new Date();
-    const row = { id: crypto.randomUUID(), fromUserId, toUserId, message, status: 'pending', createdAt: now, updatedAt: now } as any;
+    const row = {
+      id: crypto.randomUUID(),
+      fromUserId,
+      toUserId,
+      message,
+      status: "pending",
+      createdAt: now,
+      updatedAt: now,
+    } as any;
     return this.db.insert(chatRequests).values(row).returning();
   }
 
@@ -109,7 +171,11 @@ export class RequestsRepository {
     return rows as any[];
   }
 
-  async listAllReceived(userId: string, limit: number, offset: number): Promise<RequestItem[]> {
+  async listAllReceived(
+    userId: string,
+    limit: number,
+    offset: number
+  ): Promise<RequestItem[]> {
     const q = sql`
       (
         SELECT 'meetup'::text AS kind,
@@ -118,15 +184,28 @@ export class RequestsRepository {
                mr.status,
                mr.sender_user_id AS sender_user_id,
                u.name AS sender_name,
+               u.dob AS sender_dob,
+               u.company AS sender_company,
+               u.position AS sender_position,
                m.id AS meetup_id,
                m.name AS meetup_name,
                NULL::uuid AS from_user_id,
                NULL::uuid AS to_user_id,
-               mr.message
+               mr.message,
+               up.original_url AS sender_avatar
         FROM meetup_requests mr
         INNER JOIN meetups m ON m.id = mr.meetup_id
         INNER JOIN users u ON u.id = mr.sender_user_id
-        WHERE m.host_id = ${userId}
+        LEFT JOIN LATERAL (
+          SELECT original_url
+          FROM user_photos
+          WHERE user_id = u.id
+            AND image_type = 'avatar'
+            AND is_active = true
+          ORDER BY created_at DESC
+          LIMIT 1
+        ) up ON true
+        WHERE m.host_id = ${userId} AND mr.status = 'pending'
       )
       UNION ALL
       (
@@ -136,28 +215,54 @@ export class RequestsRepository {
                cr.status,
                cr.from_user_id AS sender_user_id,
                u.name AS sender_name,
+               u.dob AS sender_dob,
+               u.company AS sender_company,
+               u.position AS sender_position,
                NULL::uuid AS meetup_id,
                NULL::text AS meetup_name,
                cr.from_user_id,
                cr.to_user_id,
-               cr.message
+               cr.message,
+               up.original_url AS sender_avatar
         FROM chat_requests cr
         INNER JOIN users u ON u.id = cr.from_user_id
-        WHERE cr.to_user_id = ${userId}
+        LEFT JOIN LATERAL (
+          SELECT original_url
+          FROM user_photos
+          WHERE user_id = u.id
+            AND image_type = 'avatar'
+            AND is_active = true
+          ORDER BY created_at DESC
+          LIMIT 1
+        ) up ON true
+        WHERE cr.to_user_id = ${userId} AND cr.status = 'pending'
       )
       ORDER BY created_at DESC, id DESC
       LIMIT ${limit} OFFSET ${offset}
     `;
     const res = await this.db.execute(q);
-    return (Array.isArray(res) ? (res as any) : (res as any).rows) as RequestItem[];
+    return (
+      Array.isArray(res) ? (res as any) : (res as any).rows
+    ) as RequestItem[];
   }
 
   getChatRequestById(id: string) {
-    return this.db.execute(sql`SELECT * FROM chat_requests WHERE id = ${id} LIMIT 1`);
+    return this.db.execute(
+      sql`SELECT * FROM chat_requests WHERE id = ${id} LIMIT 1`
+    );
   }
 
-  async judgeChatRequest(id: string, toUserId: string, action: 'accept' | 'decline' | 'archive') {
-    const newStatus = action === 'accept' ? 'accepted' : action === 'decline' ? 'declined' : 'archived';
+  async judgeChatRequest(
+    id: string,
+    toUserId: string,
+    action: "accept" | "decline" | "archive"
+  ) {
+    const newStatus =
+      action === "accept"
+        ? "accepted"
+        : action === "decline"
+        ? "declined"
+        : "archived";
     const q = sql`UPDATE chat_requests SET status = ${newStatus}, updated_at = NOW() WHERE id = ${id} AND to_user_id = ${toUserId} RETURNING *`;
     const res = await this.db.execute(q);
     const rows = Array.isArray(res) ? (res as any) : (res as any).rows;

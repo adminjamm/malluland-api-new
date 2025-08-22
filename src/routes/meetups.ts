@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Container } from "typedi";
 import { MeetupsService } from "../services/meetups.service";
+import { authorize } from "../middleware/auth";
 
 export const meetupsRouter = new Hono();
 
@@ -11,6 +12,7 @@ const svc = () => Container.get(MeetupsService);
 // Discovery
 meetupsRouter.get(
   "/",
+  authorize({ bypassOnboardingCheck: true }),
   zValidator(
     "query",
     z.object({
@@ -27,7 +29,7 @@ meetupsRouter.get(
       city,
       activityId,
     } = c.req.valid("query");
-    const userId = c.req.header("x-user-id") || undefined;
+    const userId = c.get("profile").id;
     const items = await svc().getDiscovery({
       filter,
       page: Number(page),
@@ -43,6 +45,7 @@ meetupsRouter.get(
 // My meetups (hosted by me)
 meetupsRouter.get(
   "/me",
+  authorize({ bypassOnboardingCheck: true }),
   zValidator(
     "query",
     z.object({
@@ -51,8 +54,7 @@ meetupsRouter.get(
     })
   ),
   async (c) => {
-    const userId = c.req.header("x-user-id");
-    if (!userId) return c.json({ error: "x-user-id header required" }, 400);
+    const userId = c.get("profile").id;
     const { page = "1", includePast } = c.req.valid("query");
     const items = await svc().getMyMeetups({
       userId,
@@ -66,6 +68,7 @@ meetupsRouter.get(
 // Create
 meetupsRouter.post(
   "/",
+  authorize({ bypassOnboardingCheck: true }),
   zValidator(
     "json",
     z.object({
@@ -88,8 +91,7 @@ meetupsRouter.post(
     })
   ),
   async (c) => {
-    const userId = c.req.header("x-user-id");
-    if (!userId) return c.json({ error: "x-user-id header required" }, 400);
+    const userId = c.get("profile").id;
     const body = c.req.valid("json");
     const row = await svc().createMeetup(userId, {
       ...body,
@@ -103,6 +105,7 @@ meetupsRouter.post(
 // Update
 meetupsRouter.patch(
   "/:id",
+  authorize({ bypassOnboardingCheck: true }),
   zValidator(
     "json",
     z.object({
@@ -125,8 +128,7 @@ meetupsRouter.patch(
     })
   ),
   async (c) => {
-    const userId = c.req.header("x-user-id");
-    if (!userId) return c.json({ error: "x-user-id header required" }, 400);
+    const userId = c.get("profile").id;
     const id = c.req.param("id");
     const body = c.req.valid("json");
     const payload: any = { ...body };
@@ -139,25 +141,32 @@ meetupsRouter.patch(
 );
 
 // Soft delete
-meetupsRouter.delete("/:id", async (c) => {
-  const userId = c.req.header("x-user-id");
-  if (!userId) return c.json({ error: "x-user-id header required" }, 400);
-  const id = c.req.param("id");
-  const row = await svc().deleteMeetup(id, userId);
-  if (!row.length) return c.json({ error: "Not found" }, 404);
-  return c.json({ ok: true });
-});
+meetupsRouter.delete(
+  "/:id",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const id = c.req.param("id");
+    const row = await svc().deleteMeetup(id, userId);
+    if (!row.length) return c.json({ error: "Not found" }, 404);
+    return c.json({ ok: true });
+  }
+);
 
 // Get by id
-meetupsRouter.get("/:id", async (c) => {
-  const id = c.req.param("id");
-  const requestUserId = c.req.header("x-user-id") || undefined;
-  const rows = await svc().getMeetupById(id, requestUserId);
-  if (!rows || (Array.isArray(rows) && rows.length === 0))
-    return c.json({ error: "Not found" }, 404);
-  const row = Array.isArray(rows) ? rows[0] : rows;
-  return c.json(row);
-});
+meetupsRouter.get(
+  "/:id",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const id = c.req.param("id");
+    const userId = c.get("profile").id;
+    const rows = await svc().getMeetupById(id, userId);
+    if (!rows || (Array.isArray(rows) && rows.length === 0))
+      return c.json({ error: "Not found" }, 404);
+    const row = Array.isArray(rows) ? rows[0] : rows;
+    return c.json(row);
+  }
+);
 
 // Attendees
 meetupsRouter.get("/:id/attendees", async (c) => {
@@ -169,11 +178,11 @@ meetupsRouter.get("/:id/attendees", async (c) => {
 // Send request to join
 meetupsRouter.post(
   "/:id/requests",
+  authorize({ bypassOnboardingCheck: true }),
   zValidator("json", z.object({ message: z.string().max(500) })),
   async (c) => {
     console.log("Request to join meetup");
-    const userId = c.req.header("x-user-id");
-    if (!userId) return c.json({ error: "x-user-id header required" }, 400);
+    const userId = c.get("profile").id;
     const id = c.req.param("id");
     console.log("Meetup ID:", id);
     try {
@@ -193,10 +202,10 @@ meetupsRouter.post(
 // Sent requests
 meetupsRouter.get(
   "/me/requests/sent",
+  authorize({ bypassOnboardingCheck: true }),
   zValidator("query", z.object({ page: z.string().optional() })),
   async (c) => {
-    const userId = c.req.header("x-user-id");
-    if (!userId) return c.json({ error: "x-user-id header required" }, 400);
+    const userId = c.get("profile").id;
     const { page = "1" } = c.req.valid("query");
     const rows = await svc().listSentRequests(userId, Number(page));
     return c.json({ page: Number(page), pageSize: 20, items: rows });
@@ -206,10 +215,10 @@ meetupsRouter.get(
 // Received requests
 meetupsRouter.get(
   "/me/requests/received",
+  authorize({ bypassOnboardingCheck: true }),
   zValidator("query", z.object({ page: z.string().optional() })),
   async (c) => {
-    const userId = c.req.header("x-user-id");
-    if (!userId) return c.json({ error: "x-user-id header required" }, 400);
+    const userId = c.get("profile").id;
     const { page = "1" } = c.req.valid("query");
     const rows = await svc().listReceivedRequests(userId, Number(page));
     return c.json({ page: Number(page), pageSize: 20, items: rows });
@@ -217,50 +226,60 @@ meetupsRouter.get(
 );
 
 // Approve/Decline a request
-meetupsRouter.post("/requests/:id/approve", async (c) => {
-  const userId = c.req.header("x-user-id");
-  if (!userId) return c.json({ error: "x-user-id header required" }, 400);
-  const id = c.req.param("id");
-  try {
-    const row = await svc().judgeRequest(id, userId, "accept");
-    return c.json(row[0]);
-  } catch (e) {
-    console.error("Error approving meetup request:", e);
-    return c.json({ error: (e as Error).message }, 400);
+meetupsRouter.post(
+  "/requests/:id/approve",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const id = c.req.param("id");
+    try {
+      const row = await svc().judgeRequest(id, userId, "accept");
+      return c.json(row[0]);
+    } catch (e) {
+      console.error("Error approving meetup request:", e);
+      return c.json({ error: (e as Error).message }, 400);
+    }
   }
-});
+);
 
-meetupsRouter.post("/requests/:id/decline", async (c) => {
-  const userId = c.req.header("x-user-id");
-  if (!userId) return c.json({ error: "x-user-id header required" }, 400);
-  const id = c.req.param("id");
-  try {
-    const row = await svc().judgeRequest(id, userId, "decline");
-    return c.json(row[0]);
-  } catch (e) {
-    return c.json({ error: (e as Error).message }, 400);
+meetupsRouter.post(
+  "/requests/:id/decline",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
+    const id = c.req.param("id");
+    try {
+      const row = await svc().judgeRequest(id, userId, "decline");
+      return c.json(row[0]);
+    } catch (e) {
+      return c.json({ error: (e as Error).message }, 400);
+    }
   }
-});
+);
 
 // Leave meetup (for attendees)
-meetupsRouter.post("/:meetupId/leave", async (c) => {
-  const userId = c.req.header("x-user-id");
-  if (!userId) return c.json({ error: "x-user-id header required" }, 400);
+meetupsRouter.post(
+  "/:meetupId/leave",
+  authorize({ bypassOnboardingCheck: true }),
+  async (c) => {
+    const userId = c.get("profile").id;
 
-  const meetupId = c.req.param("meetupId");
+    const meetupId = c.req.param("meetupId");
 
-  try {
-    const result = await svc().leaveMeetup(meetupId, userId);
-    return c.json({ success: true, message: "Successfully left meetup" });
-  } catch (e) {
-    console.error("Error leaving meetup:", e);
-    return c.json({ error: (e as Error).message }, 400);
+    try {
+      const result = await svc().leaveMeetup(meetupId, userId);
+      return c.json({ success: true, message: "Successfully left meetup" });
+    } catch (e) {
+      console.error("Error leaving meetup:", e);
+      return c.json({ error: (e as Error).message }, 400);
+    }
   }
-});
+);
 
 // Remove participant (for hosts)
 meetupsRouter.delete(
   "/:meetupId/remove-participant",
+  authorize({ bypassOnboardingCheck: true }),
   zValidator(
     "json",
     z.object({
@@ -268,8 +287,7 @@ meetupsRouter.delete(
     })
   ),
   async (c) => {
-    const userId = c.req.header("x-user-id");
-    if (!userId) return c.json({ error: "x-user-id header required" }, 400);
+    const userId = c.get("profile").id;
 
     const meetupId = c.req.param("meetupId");
     const { participantId } = c.req.valid("json");

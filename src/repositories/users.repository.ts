@@ -12,6 +12,8 @@ import {
   userFavoritesText,
   userSettings,
   userLocation,
+  catalogActors,
+  catalogActresses,
 } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
@@ -184,8 +186,20 @@ export class UsersRepository {
   }
   listFavoriteActors(userId: string) {
     return this.db
-      .select()
+      .select({
+        userId: userFavoriteActors.userId,
+        actorId: userFavoriteActors.actorId,
+        position: userFavoriteActors.position,
+        name: catalogActors.name,
+        slug: catalogActors.slug,
+        imageUrl: catalogActors.imageUrl,
+        originalUrl: catalogActors.originalUrl,
+      })
       .from(userFavoriteActors)
+      .innerJoin(
+        catalogActors,
+        eq(userFavoriteActors.actorId, catalogActors.id)
+      )
       .where(eq(userFavoriteActors.userId, userId))
       .orderBy(userFavoriteActors.position);
   }
@@ -206,8 +220,20 @@ export class UsersRepository {
   }
   listFavoriteActresses(userId: string) {
     return this.db
-      .select()
+      .select({
+        userId: userFavoriteActresses.userId,
+        actorId: userFavoriteActresses.actressId,
+        position: userFavoriteActresses.position,
+        name: catalogActresses.name,
+        slug: catalogActresses.slug,
+        imageUrl: catalogActresses.imageUrl,
+        originalUrl: catalogActresses.originalUrl,
+      })
       .from(userFavoriteActresses)
+      .innerJoin(
+        catalogActresses,
+        eq(userFavoriteActresses.actressId, catalogActresses.id)
+      )
       .where(eq(userFavoriteActresses.userId, userId))
       .orderBy(userFavoriteActresses.position);
   }
