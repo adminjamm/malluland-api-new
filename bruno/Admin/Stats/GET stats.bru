@@ -1,0 +1,10 @@
+meta {
+  name: GET stats
+  type: http
+  seq: 1
+}
+
+@token = {{adminToken}}
+
+get {{baseUrl}}/admin/stats
+authorization: Bearer {{token}}

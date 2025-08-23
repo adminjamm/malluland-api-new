@@ -1,0 +1,25 @@
+meta {
+  name: Applications: Reject Selfies
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/admin/applications/selfieRejects
+  auth: inherit
+  headers {
+    Authorization: Bearer {{adminToken}}
+    Content-Type: application/json
+  }
+  body: json {
+    ids: [
+      "00000000-0000-0000-0000-0000000000aa",
+      "00000000-0000-0000-0000-0000000000bb"
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+

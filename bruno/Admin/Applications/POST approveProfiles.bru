@@ -1,0 +1,25 @@
+meta {
+  name: Applications: Approve Profiles
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/admin/applications/approveProfiles
+  auth: inherit
+  headers {
+    Authorization: Bearer {{adminToken}}
+    Content-Type: application/json
+  }
+  body: json {
+    ids: [
+      "00000000-0000-0000-0000-000000000001",
+      "00000000-0000-0000-0000-000000000002"
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+

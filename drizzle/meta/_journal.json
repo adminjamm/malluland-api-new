@@ -36,6 +36,13 @@
       "when": 1755541661827,
       "tag": "0004_conscious_gorgon",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1755757367135,
+      "tag": "0005_white_paladin",
+      "breakpoints": true
     }
   ]
 }

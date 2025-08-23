@@ -1,0 +1,17 @@
+meta {
+  name: POST create
+  type: http
+  seq: 1
+}
+
+@token = {{adminToken}}
+
+post {{baseUrl}}/admin/logs/create
+content-type: application/json
+authorization: Bearer {{token}}
+
+{
+  "userId": "{{userId}}",
+  "actionType": "approved",
+  "cmsPage": "members"
+}

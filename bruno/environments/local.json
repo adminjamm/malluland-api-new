@@ -3,6 +3,7 @@
   "type": "environment",
   "variables": {
     "baseUrl": "http://localhost:8787",
-    "userId": "11111111-1111-1111-1111-111111111111"
+    "userId": "11111111-1111-1111-1111-111111111111",
+    "adminToken": "{{admin_token_here}}"
   }
 }

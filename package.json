@@ -27,7 +27,9 @@
     "db:truncate-all": "tsx src/scripts/truncate-all.ts",
     "fix:app-settings-timestamps": "tsx src/scripts/fixes/fixAppSettingsTimestamps.ts",
     "seed:bookmarks": "tsx src/scripts/seeds/bookmarks.ts",
-    "seed:demo-users": "tsx src/scripts/seeds/demoUsersCluster.ts"
+    "seed:demo-users": "tsx src/scripts/seeds/demoUsersCluster.ts",
+    "seed:user-selfies": "tsx src/scripts/seeds/userSelfies.ts",
+    "seed:user-favorites-text": "tsx src/scripts/seeds/userFavoritesText.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.645.0",
@@ -38,6 +40,7 @@
     "@oslojs/encoding": "^1.1.0",
     "arctic": "^3.7.0",
     "aws-sdk": "^2.1692.0",
+    "bcryptjs": "^2.4.3",
     "dotenv": "^17.2.1",
     "drizzle-orm": "^0.40.1",
     "drizzle-seed": "^0.3.1",

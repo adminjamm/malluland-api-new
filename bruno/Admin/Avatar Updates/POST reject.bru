@@ -1,0 +1,15 @@
+meta {
+  name: POST reject
+  type: http
+  seq: 3
+}
+
+@token = {{adminToken}}
+
+post {{baseUrl}}/admin/avatar-updates/reject
+content-type: application/json
+authorization: Bearer {{token}}
+
+{
+  "ids": ["{{photo_id}}"]
+}

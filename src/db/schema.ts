@@ -117,6 +117,7 @@ export const userPhotos = pgTable("user_photos", {
   imageType: text("image_type").notNull(),
   position: integer("position").notNull(),
   isActive: boolean("is_active").default(true),
+  status: text("status").default("pending"), // pending | approved | rejected
   optimizationStatus: text("optimization_status").default("pending"),
   optimizationAttempts: integer("optimization_attempts").default(0),
   optimizedAt: timestamp("optimized_at"),
