@@ -1,0 +1,27 @@
+meta {
+  name: Requests: Create chat request
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{endpoint}}/requests/chats
+  body: json
+  auth: inherit
+}
+
+headers {
+  x-user-id: d7c351f8-18a4-4840-ac6f-2f27103cd048
+  content-type: application/json
+}
+
+body:json {
+  {
+    "message": "Hey! Let's chat?",
+    "toUserId": "d9048a46-bafe-40b5-b419-7d25d431b1d6"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

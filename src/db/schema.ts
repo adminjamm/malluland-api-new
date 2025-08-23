@@ -117,6 +117,7 @@ export const userPhotos = pgTable("user_photos", {
   imageType: text("image_type").notNull(),
   position: integer("position").notNull(),
   isActive: boolean("is_active").default(true),
+  status: text("status").default("pending"), // pending | approved | rejected
   optimizationStatus: text("optimization_status").default("pending"),
   optimizationAttempts: integer("optimization_attempts").default(0),
   optimizedAt: timestamp("optimized_at"),
@@ -274,6 +275,7 @@ export const meetups = pgTable("meetups", {
   city: text("city"),
   state: text("state"),
   country: text("country"),
+  chatRoomId: uuid("chat_room_id"),
 });
 
 export const meetupRequests = pgTable("meetup_requests", {
@@ -303,6 +305,7 @@ export const chatRequests = pgTable("chat_requests", {
   status: text("status"), // pending | accepted | archived | declined
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  chatRoomId: uuid("chat_room_id"), // nullable, for when a chat room is created after acceptance
 });
 
 export const chatRooms = pgTable("chat_rooms", {
@@ -311,6 +314,7 @@ export const chatRooms = pgTable("chat_rooms", {
   meetupId: uuid("meetup_id"), // nullable for DM
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  deletedAt: timestamp("deleted_at"),
 });
 
 export const chatRoomParticipants = pgTable("chat_room_participants", {

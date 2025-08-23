@@ -1,18 +1,32 @@
-import { Service, Container } from 'typedi';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { chatRooms, chatRoomParticipants, chatMessages } from '../db/schema';
-import { sql } from 'drizzle-orm';
+import { Service, Container } from "typedi";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { chatRooms, chatRoomParticipants, chatMessages } from "../db/schema";
+import { and, eq, sql } from "drizzle-orm";
 
 export type Db = NodePgDatabase;
 
 @Service()
 export class ChatRepository {
   private get db(): Db {
-    return Container.get('db');
+    return Container.get("db");
   }
 
-  createChatRoom({ id, type, meetupId }: { id: string; type: 'DM' | 'meetup'; meetupId?: string | null }) {
-    const row = { id, type, meetupId: meetupId ?? null, createdAt: new Date(), updatedAt: new Date() } as any;
+  createChatRoom({
+    id,
+    type,
+    meetupId,
+  }: {
+    id: string;
+    type: "DM" | "meetup";
+    meetupId?: string | null;
+  }) {
+    const row = {
+      id,
+      type,
+      meetupId: meetupId ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any;
     return this.db.insert(chatRooms).values(row).returning();
   }
 
@@ -24,20 +38,27 @@ export class ChatRepository {
       lastReadMessageId: null,
       unreadCount: 0,
       joinedAt: now,
-      status: 'active',
+      status: "active",
       createdAt: now,
       updatedAt: now,
     })) as any[];
     return this.db.insert(chatRoomParticipants).values(rows).returning();
   }
 
-  createTextMessage({ id, chatId, senderUserId, body }: { id: string; chatId: string; senderUserId: string; body: string }) {
+  createTextMessage({
+    chatId,
+    senderUserId,
+    body,
+  }: {
+    chatId: string;
+    senderUserId: string;
+    body: string;
+  }) {
     const now = new Date();
     const row = {
-      id,
       chatId,
       senderUserId,
-      kind: 'text',
+      kind: "text",
       body,
       createdAt: now,
       updatedAt: now,
@@ -45,10 +66,40 @@ export class ChatRepository {
     return this.db.insert(chatMessages).values(row).returning();
   }
 
-  async findMeetupRoomByParticipants(meetupId: string, userA: string, userB: string): Promise<{ id: string } | null> {
+  async findMeetupRoomByParticipants(
+    meetupId: string,
+    userA: string,
+    userB: string
+  ): Promise<{ id: string } | null> {
     const q = sql`SELECT cr.id
                   FROM chat_rooms cr
                   WHERE cr.meetup_id = ${meetupId}
+                    AND EXISTS (SELECT 1 FROM chat_room_participants p1 WHERE p1.chat_room_id = cr.id AND p1.user_id = ${userA})
+                    AND EXISTS (SELECT 1 FROM chat_room_participants p2 WHERE p2.chat_room_id = cr.id AND p2.user_id = ${userB})
+                  ORDER BY cr.created_at ASC
+                  LIMIT 1`;
+    const res: any = await this.db.execute(q);
+    const rows = Array.isArray(res) ? res : res.rows;
+    return rows && rows.length ? { id: rows[0].id as string } : null;
+  }
+
+  async findMeetupRoomByMeetupId(
+    meetupId: string
+  ): Promise<{ id: string } | null> {
+    const q = sql`SELECT cr.id FROM chat_rooms cr WHERE cr.meetup_id = ${meetupId} ORDER BY cr.created_at ASC LIMIT 1`;
+    const res: any = await this.db.execute(q);
+    const rows = Array.isArray(res) ? res : res.rows;
+    return rows && rows.length ? { id: rows[0].id as string } : null;
+  }
+
+  async findDmRoomByParticipants(
+    userA: string,
+    userB: string
+  ): Promise<{ id: string } | null> {
+    // DM rooms are those with type = 'DM' and meetup_id IS NULL
+    const q = sql`SELECT cr.id
+                  FROM chat_rooms cr
+                  WHERE cr.type = 'DM' AND cr.meetup_id IS NULL
                     AND EXISTS (SELECT 1 FROM chat_room_participants p1 WHERE p1.chat_room_id = cr.id AND p1.user_id = ${userA})
                     AND EXISTS (SELECT 1 FROM chat_room_participants p2 WHERE p2.chat_room_id = cr.id AND p2.user_id = ${userB})
                   ORDER BY cr.created_at ASC
@@ -63,5 +114,35 @@ export class ChatRepository {
     const res: any = await this.db.execute(q);
     const rows = Array.isArray(res) ? res : res.rows;
     return !!(rows && rows.length);
+  }
+
+  async roomExists(chatId: string): Promise<boolean> {
+    const q = sql`SELECT 1 FROM chat_rooms WHERE id = ${chatId} LIMIT 1`;
+    const res: any = await this.db.execute(q);
+    const rows = Array.isArray(res) ? res : res.rows;
+    return !!(rows && rows.length);
+  }
+
+  async isActiveParticipant(chatId: string, userId: string): Promise<boolean> {
+    const q = sql`SELECT 1 FROM chat_room_participants WHERE chat_room_id = ${chatId} AND user_id = ${userId} AND status = 'active' LIMIT 1`;
+    const res: any = await this.db.execute(q);
+    const rows = Array.isArray(res) ? res : res.rows;
+    return !!(rows && rows.length);
+  }
+
+  updateParticipantStatus(chatRoomId: string, userId: string, status: string) {
+    return this.db
+      .update(chatRoomParticipants)
+      .set({
+        status,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(chatRoomParticipants.chatRoomId, chatRoomId),
+          eq(chatRoomParticipants.userId, userId)
+        )
+      )
+      .returning();
   }
 }

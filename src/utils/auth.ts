@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { users } from "../db/schema";
-// import { firebaseAuth } from "./firebase";
-// import { decodeBase64IgnorePadding } from "@oslojs/encoding";
+import { firebaseAuth } from "./firebase";
+import { decodeBase64IgnorePadding } from "@oslojs/encoding";
 import { Google, Apple, generateCodeVerifier, decodeIdToken } from "arctic";
 import type { JwtPayload } from "../types";
 import { env } from "./env";
@@ -16,21 +16,21 @@ const google = new Google(
   env.GOOGLE_REDIECT_URL
 );
 
-// const APPLE_PRIVATE_KEY = decodeBase64IgnorePadding(
-//   env.APPLE_PRIVATE_KEY.replace("-----BEGIN PRIVATE KEY-----", "")
-//     .replace("-----END PRIVATE KEY-----", "")
-//     .replaceAll("\r", "")
-//     .replaceAll("\n", "")
-//     .trim()
-// );
+const APPLE_PRIVATE_KEY = decodeBase64IgnorePadding(
+  env.APPLE_PRIVATE_KEY.replace("-----BEGIN PRIVATE KEY-----", "")
+    .replace("-----END PRIVATE KEY-----", "")
+    .replace(/\r/g, "")
+    .replace(/\n/g, "")
+    .trim()
+);
 
-// const apple = new Apple(
-//   env.APPLE_CLIENT_ID,
-//   env.APPLE_TEAM_ID,
-//   env.APPLE_KEY_ID,
-//   APPLE_PRIVATE_KEY,
-//   env.APPLE_REDIRECT_URL
-// );
+const apple = new Apple(
+  env.APPLE_CLIENT_ID,
+  env.APPLE_TEAM_ID,
+  env.APPLE_KEY_ID,
+  APPLE_PRIVATE_KEY,
+  env.APPLE_REDIRECT_URL
+);
 
 export const getGoogleAuthUrl = (requestedFrom: string) => {
   const scopes = ["openid", "profile", "email"];
@@ -68,21 +68,21 @@ export const getGoogleUser = async (accessToken: string) => {
   return user;
 };
 
-// export const getAppleAuthUrl = (requestedFrom: string) => {
-//   const scopes = ["name", "email"];
-//   const state = encodeURIComponent(JSON.stringify({ requestedFrom }));
+export const getAppleAuthUrl = (requestedFrom: string) => {
+  const scopes = ["name", "email"];
+  const state = encodeURIComponent(JSON.stringify({ requestedFrom }));
 
-//   const url = apple.createAuthorizationURL(state, scopes);
+  const url = apple.createAuthorizationURL(state, scopes);
 
-//   url.searchParams.set("response_mode", "form_post");
+  url.searchParams.set("response_mode", "form_post");
 
-//   return url;
-// };
+  return url;
+};
 
-// export const getAppleAccessToken = async (code: string) => {
-//   const tokens = await apple.validateAuthorizationCode(code);
-//   return tokens;
-// };
+export const getAppleAccessToken = async (code: string) => {
+  const tokens = await apple.validateAuthorizationCode(code);
+  return tokens;
+};
 
 export type DecodedIdToken = {
   iss: string;
@@ -132,7 +132,7 @@ export const generateAuthTokens = async (
   // sessionId: string,
   isDummyAccount = false
 ) => {
-  // const firebasetoken = await firebaseAuth.createCustomToken(profile.id);
+  const firebasetoken = await firebaseAuth.createCustomToken(user.id);
   const jwtPayload: JwtPayload = {
     id: user.id,
     name: user.name!,
@@ -143,7 +143,7 @@ export const generateAuthTokens = async (
   });
 
   return {
-    // firebasetoken,
+    firebasetoken,
     jwttoken,
   };
 };

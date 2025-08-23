@@ -1,0 +1,17 @@
+meta {
+  name: GET chat room v2 by id
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{base_url}}/chats/v2/rooms/8c3eb325-8b8f-4c31-8463-b02a03e2d498
+  body: none
+  auth: none
+}
+
+headers {
+  x-user-id: d7c351f8-18a4-4840-ac6f-2f27103cd048
+  Content-Type: application/json
+  ~Authorization: Bearer {{JWT}}
+}

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { Container } from 'typedi';
 import { PeopleService } from '../services/people.service';
+import { getConnInfo } from '@hono/node-server/conninfo';
 
 export const peopleRouter = new Hono();
 
@@ -22,6 +23,19 @@ peopleRouter.get(
   async (c) => {
     const { page = '1', lat, lng, gender = 'all', ageMin, ageMax, interests, radiusKm, under15 } = c.req.valid('query');
     const userId = c.req.header('x-user-id');
+    const xff = c.req.header('x-forwarded-for');
+    console.log('xff', xff)
+    const conn = (() => { try { return getConnInfo(c); } catch { return undefined; } })();
+    const remoteIp = (conn && (conn.remote?.address || (typeof conn.remote === 'string' ? conn.remote : undefined))) || undefined;
+    const ip = (xff && xff.split(',')[0].trim())
+      || c.req.header('x-real-ip')
+      || c.req.header('cf-connecting-ip')
+      || c.req.header('x-client-ip')
+      || c.req.header('fastly-client-ip')
+      || c.req.header('true-client-ip')
+      || remoteIp
+      || 'unknown';
+    console.log('[people] GET / - userId=%s ip=%s', userId ?? 'missing', ip);
     if (!userId) return c.json({ error: 'x-user-id header required' }, 400);
     const svc = Container.get(PeopleService);
     const center = lat && lng ? { lat: Number(lat), lng: Number(lng) } : undefined;
@@ -44,6 +58,7 @@ peopleRouter.get(
       });
       return c.json({ page: Number(page), pageSize: 20, items });
     } catch (e) {
+      console.error('[people] GET / - error:', e);
       return c.json({ error: (e as Error).message }, 400);
     }
   }

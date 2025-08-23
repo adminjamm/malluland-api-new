@@ -26,6 +26,14 @@ async function main() {
   await seedAppSettings();
   await seedUsers();
 
+  // Populate DOBs for existing users (18-55)
+  try {
+    const { seedUsersDob } = await import('./usersDob');
+    await seedUsersDob();
+  } catch (e) {
+    console.warn('[seed:usersDob] Skipping DOB seeding:', (e as Error).message);
+  }
+
   // Seed user locations so People API works without explicit lat/lng
   try {
     const { seedUserLocation } = await import('./userLocation');
@@ -40,6 +48,14 @@ async function main() {
     await seedUserPhotos();
   } catch (e) {
     console.warn('[seed:user_photos] Skipping user photos seeding:', (e as Error).message);
+  }
+
+  // Backfill user_selfie rows for all users (idempotent)
+  try {
+    const { run: runUserSelfies } = await import('./userSelfies');
+    await runUserSelfies();
+  } catch (e) {
+    console.warn('[seed:user_selfie] Skipping user_selfie seeding:', (e as Error).message);
   }
 
   // Airports from CSV (optional)
@@ -58,12 +74,28 @@ async function main() {
   const { run: runMeetupAttendees } = await import('./meetupAttendees');
   await runMeetupAttendees();
 
+  // Seed chat requests (idempotent)
+  try {
+    const { run: runChatRequests } = await import('./chatRequests');
+    await runChatRequests();
+  } catch (e) {
+    console.warn('[seed:chat_requests] Skipping chat requests seeding:', (e as Error).message);
+  }
+
   // Seed bookmarks (idempotent)
   try {
     const { run: runBookmarks } = await import('./bookmarks');
     await runBookmarks();
   } catch (e) {
     console.warn('[seed:bookmarks] Skipping bookmarks seeding:', (e as Error).message);
+  }
+
+  // Seed user_favorites_text (idempotent)
+  try {
+    const { seedUserFavoritesText } = await import('./userFavoritesText');
+    await seedUserFavoritesText();
+  } catch (e) {
+    console.warn('[seed:user_favorites_text] Skipping user_favorites_text seeding:', (e as Error).message);
   }
 
   console.log('Seed all completed');

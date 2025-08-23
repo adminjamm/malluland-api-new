@@ -1,0 +1,25 @@
+meta {
+  name: Applications: Ban Users
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/admin/applications/banUsers
+  auth: inherit
+  headers {
+    Authorization: Bearer {{adminToken}}
+    Content-Type: application/json
+  }
+  body: json {
+    ids: [
+      "00000000-0000-0000-0000-000000000005",
+      "00000000-0000-0000-0000-000000000006"
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+

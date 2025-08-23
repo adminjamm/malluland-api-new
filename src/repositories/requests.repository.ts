@@ -1,6 +1,7 @@
 import { Service, Container } from 'typedi';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
+import { chatRequests } from '../db/schema';
 
 export type Db = NodePgDatabase;
 
@@ -72,6 +73,42 @@ export class RequestsRepository {
     return (Array.isArray(res) ? (res as any) : (res as any).rows) as RequestItem[];
   }
 
+  async listChatSent(userId: string, limit: number, offset: number): Promise<RequestItem[]> {
+    const q = sql`
+      SELECT 'chat'::text AS kind,
+             cr.id,
+             cr.created_at,
+             cr.status,
+             cr.from_user_id AS sender_user_id,
+             u.name AS sender_name,
+             NULL::uuid AS meetup_id,
+             NULL::text AS meetup_name,
+             cr.from_user_id,
+             cr.to_user_id,
+             cr.message
+      FROM chat_requests cr
+      INNER JOIN users u ON u.id = cr.to_user_id
+      WHERE cr.from_user_id = ${userId}
+      ORDER BY cr.created_at DESC, cr.id DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+    const res = await this.db.execute(q);
+    return (Array.isArray(res) ? (res as any) : (res as any).rows) as RequestItem[];
+  }
+
+  async createChatRequest(fromUserId: string, toUserId: string, message: string) {
+    const now = new Date();
+    const row = { id: crypto.randomUUID(), fromUserId, toUserId, message, status: 'pending', createdAt: now, updatedAt: now } as any;
+    return this.db.insert(chatRequests).values(row).returning();
+  }
+
+  async setChatRequestRoom(id: string, chatRoomId: string) {
+    const q = sql`UPDATE chat_requests SET chat_room_id = ${chatRoomId}, updated_at = NOW() WHERE id = ${id} RETURNING *`;
+    const res = await this.db.execute(q);
+    const rows = Array.isArray(res) ? (res as any) : (res as any).rows;
+    return rows as any[];
+  }
+
   async listAllReceived(userId: string, limit: number, offset: number): Promise<RequestItem[]> {
     const q = sql`
       (
@@ -113,6 +150,10 @@ export class RequestsRepository {
     `;
     const res = await this.db.execute(q);
     return (Array.isArray(res) ? (res as any) : (res as any).rows) as RequestItem[];
+  }
+
+  getChatRequestById(id: string) {
+    return this.db.execute(sql`SELECT * FROM chat_requests WHERE id = ${id} LIMIT 1`);
   }
 
   async judgeChatRequest(id: string, toUserId: string, action: 'accept' | 'decline' | 'archive') {

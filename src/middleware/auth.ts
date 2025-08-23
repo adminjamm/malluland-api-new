@@ -68,7 +68,7 @@ export const authorize = ({
     if(bypassOnboardingCheck) {
       return next();
     }
-    
+
     const authToken = c.req.header("Authorization");
     if (!authToken) {
       return c.json({ message: "Unauthorized" }, 401);

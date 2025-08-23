@@ -1,0 +1,10 @@
+meta {
+  name: GET list
+  type: http
+  seq: 2
+}
+
+@token = {{adminToken}}
+
+get {{baseUrl}}/admin/logs/list
+authorization: Bearer {{token}}

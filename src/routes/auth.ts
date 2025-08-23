@@ -2,20 +2,20 @@ import { Hono, type Context } from "hono";
 import { getConnInfo } from "@hono/node-server/conninfo";
 // import { UAParser } from "ua-parser-js";
 import {
+  AppleScopeUser,
+  decodeAppleIdToken,
   generateAuthTokens,
+  getAppleAccessToken,
+  getAppleAuthUrl,
+  getAppleProfileName,
   getGoogleAccessToken,
   getGoogleAuthUrl,
   getGoogleUser,
-  //   getAppleAuthUrl,
-  //   getAppleAccessToken,
-  //   decodeAppleIdToken,
-  //   type AppleScopeUser,
-  //   getAppleProfileName,
 } from "../utils/auth";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { authIdentities, users } from "../db/schema";
-// import { firebaseRtdb } from "@/api/utils/firebase";
+import { firebaseRtdb } from "../utils/firebase";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 // import { lookupIp, type IpInfoResponse } from "../utils/ip";
@@ -58,57 +58,51 @@ authRouter.get(
   }
 );
 
-// authRouter.get(
-//   "/apple/url",
-//   zValidator("query", getUrlQuerySchema),
-//   async (c) => {
-//     const { requestedFrom } = c.req.valid("query");
-//     const url = getAppleAuthUrl(requestedFrom);
+authRouter.get("/apple/url", async (c) => {
+  const url = getAppleAuthUrl("mobile");
 
-//     return c.json({ data: url.toString() });
-//   }
-// );
+  return c.json({ data: url.toString() });
+});
 
-// authRouter.post(
-//   "/apple/callback",
-//   zValidator(
-//     "form",
-//     authCallbackSchema.extend({
-//       user: z
-//         .string()
-//         .transform((str) => {
-//           try {
-//             return JSON.parse(str) as AppleScopeUser;
-//           } catch {
-//             throw new Error("Invalid user data format");
-//           }
-//         })
-//         .optional(),
-//     })
-//   ),
-//   async (c) => {
-//     const { state, code, user: scopeUser } = c.req.valid("form");
+authRouter.post(
+  "/apple/callback",
+  zValidator(
+    "form",
+    authCallbackSchema.extend({
+      user: z
+        .string()
+        .transform((str) => {
+          try {
+            return JSON.parse(str) as AppleScopeUser;
+          } catch {
+            throw new Error("Invalid user data format");
+          }
+        })
+        .optional(),
+    })
+  ),
+  async (c) => {
+    const { code, user: scopeUser } = c.req.valid("form");
 
-//     const tokens = await getAppleAccessToken(code);
-//     const decodedIdToken = await decodeAppleIdToken(tokens?.idToken());
-//     const name = await getAppleProfileName(decodedIdToken, scopeUser);
+    const tokens = await getAppleAccessToken(code);
+    const decodedIdToken = await decodeAppleIdToken(tokens?.idToken());
+    const name = await getAppleProfileName(decodedIdToken, scopeUser);
 
-//     const oauthUser: OAuthUser = {
-//       email: decodedIdToken.email,
-//       sub: decodedIdToken.sub,
-//       name,
-//     };
+    const oauthUser: OAuthUser = {
+      email: decodedIdToken.email,
+      sub: decodedIdToken.sub,
+      name,
+    };
 
-//     console.log({ oauthUser, name, decodedIdToken, scopeUser });
+    console.log({ oauthUser, name, decodedIdToken, scopeUser });
 
-//     return handleOAuthCallback({
-//       context: c,
-//       user: oauthUser,
-//       provider: "apple",
-//       state,
-//     });
-//   }
-// );
+    return handleOAuthCallback({
+      context: c,
+      user: oauthUser,
+      provider: "apple",
+    });
+  }
+);
 
 type OAuthUser = {
   email?: string;
@@ -176,17 +170,15 @@ async function handleOAuthCallback({
       return newUser[0];
     });
 
-    // const usersRef = firebaseRtdb.ref(`users/${userInDb.id}`);
-    // await usersRef.set({
-    //   name: userInDb.name,
-    //   username: userInDb.username,
-    //   unreadCounts: {
-    //     chats: {},
-    //     notifications: 0,
-    //     requests: 0,
-    //     follows: 0,
-    //   },
-    // });
+    const usersRef = firebaseRtdb.ref(`users/${userInDb.id}`);
+    await usersRef.set({
+      name: userInDb.name,
+      unreadCounts: {
+        chats: {},
+        requests: 0,
+        meetups: 0,
+      },
+    });
   }
 
   // linking of the primary and secondary dummy account needs
@@ -240,7 +232,7 @@ async function handleOAuthCallback({
   //     })
   //     .returning();
 
-  const { jwttoken } = await generateAuthTokens(
+  const { jwttoken, firebasetoken } = await generateAuthTokens(
     userInDb!
     // newSession[0].id
   );
@@ -249,7 +241,7 @@ async function handleOAuthCallback({
 
   const url = new URL(callbackUrl);
   url.searchParams.set("token", jwttoken);
-  //   url.searchParams.set("firebasetoken", firebasetoken);
+  url.searchParams.set("firebasetoken", firebasetoken);
   url.searchParams.set("new_account", String(new_account));
 
   //   if (isDummyProfileOnboardingComplete) {

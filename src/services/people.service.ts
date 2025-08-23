@@ -89,6 +89,8 @@ export class PeopleService {
       name: p.name ?? null,
       age: computeAge(p.dob ?? null),
       bioSnippet: bioSnippet(p.bio ?? null, 100),
+      company: p.company ?? null,
+      profession: p.position ?? null,
     }));
 
     return { items };

@@ -1,0 +1,10 @@
+meta {
+  name: GET members
+  type: http
+  seq: 1
+}
+
+@token = {{adminToken}}
+
+get {{baseUrl}}/admin/members?page=1&pageSize=10
+authorization: Bearer {{token}}

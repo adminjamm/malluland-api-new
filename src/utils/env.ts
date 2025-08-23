@@ -1,6 +1,20 @@
 import { z } from "zod";
 import "dotenv/config";
 
+const firebaseConfigSchema = z.object({
+  type: z.string().min(1),
+  project_id: z.string().min(1),
+  private_key_id: z.string().min(1),
+  private_key: z.string().min(1),
+  client_email: z.string().min(1),
+  client_id: z.string().min(1),
+  auth_uri: z.string().min(1),
+  token_uri: z.string().min(1),
+  auth_provider_x509_cert_url: z.string().min(1),
+  client_x509_cert_url: z.string().min(1),
+  universe_domain: z.string().min(1),
+});
+
 const schema = z.object({
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(["development", "production"]),
@@ -16,6 +30,11 @@ const schema = z.object({
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_REDIECT_URL: z.string(),
+  APPLE_CLIENT_ID: z.string().min(1),
+  APPLE_TEAM_ID: z.string().min(1),
+  APPLE_KEY_ID: z.string().min(1),
+  APPLE_PRIVATE_KEY: z.string().min(1),
+  APPLE_REDIRECT_URL: z.string().min(1),
   // AWS S3
   AWS_REGION: z.string().optional(),
   AWS_ACCESS_KEY_ID: z.string().optional(),
@@ -23,6 +42,16 @@ const schema = z.object({
   S3_BUCKET: z.string().optional(),
   // LocationIQ
   LOCATIONIQ_API_KEY: z.string().optional(),
+  FIREBASE_SERVICE_ACCOUNT: z.string().transform((str) => {
+    try {
+      const parsed = JSON.parse(str);
+      return firebaseConfigSchema.parse(parsed);
+    } catch (e) {
+      console.log(e);
+      throw new Error(`Invalid Firebase config JSON`);
+    }
+  }),
+  FIREBASE_DATABASE_URL: z.string().min(1),
 });
 
 const parsed = schema.parse({
@@ -38,11 +67,18 @@ const parsed = schema.parse({
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIECT_URL: process.env.GOOGLE_REDIECT_URL,
+  APPLE_CLIENT_ID: process.env.APPLE_CLIENT_ID,
+  APPLE_TEAM_ID: process.env.APPLE_TEAM_ID,
+  APPLE_KEY_ID: process.env.APPLE_KEY_ID,
+  APPLE_PRIVATE_KEY: process.env.APPLE_PRIVATE_KEY,
+  APPLE_REDIRECT_URL: process.env.APPLE_REDIRECT_URL,
   AWS_REGION: process.env.AWS_BUCKET_REGION,
   AWS_ACCESS_KEY_ID: process.env.AWS_BUCKET_ACCESS_KEY,
   AWS_SECRET_ACCESS_KEY: process.env.AWS_BUCKET_SECRET_KEY,
   S3_BUCKET: process.env.AWS_BUCKET_NAME,
   LOCATIONIQ_API_KEY: process.env.LOCATIONIQ_API_KEY,
+  FIREBASE_DATABASE_URL: process.env.FIREBASE_DATABASE_URL,
+  FIREBASE_SERVICE_ACCOUNT: process.env.FIREBASE_SERVICE_ACCOUNT,
 });
 
 export const env = {

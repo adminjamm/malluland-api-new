@@ -26,15 +26,20 @@ People
 Meetups
 - GET /meetups
   - Query: page (default 1)
-  - Response: 200 { page, pageSize: 20, items }
+  - Response: 200 { page, pageSize: 20, items: [{ id, name, startsAt, endsAt, city, state, country, activityId, whoPays, feeAmount, guests, hostId, hostName, hostAvatar }] }
 
 - GET /meetups?filter=this-week|this-weekend|upcoming&city&activityId
-  - Response: 200 { page, pageSize: 20, items }
+  - Response: 200 { page, pageSize: 20, items: [{ id, name, startsAt, endsAt, city, state, country, activityId, whoPays, feeAmount, guests, hostId, hostName, hostAvatar }] }
 
 - GET /meetups/me
   - Headers: x-user-id
   - Query: page (default 1), includePast (true|false)
   - Response: 200 { page, pageSize: 20, items }
+
+- GET /meetups/:id
+  - Headers: x-user-id (optional)
+  - Response: 200 { id, name, startsAt, endsAt, city, state, country, activityId, whoPays, feeAmount, guests, hostId, hostName, hostAvatar, locationText, description, mapUrl, meetupStatus, isRequested }
+  - Errors: 404 if not found
 
 - POST /meetups
   - Headers: x-user-id
@@ -99,6 +104,15 @@ Bookmarks
 
 ## Requests
 
+- POST /requests/chats
+  - Headers: x-user-id
+  - Body: { toUserId: uuid, message: string (<= 500) }
+  - Response: 201 <created chat_request row>
+
+- GET /requests/chats?page=1
+  - Headers: x-user-id
+  - Response: 200 { page, pageSize: 21, items }
+
 ### GET /chats/rooms
 List chat rooms for the authenticated user. Includes unread counts, last message metadata, and participant user IDs.
 
@@ -109,6 +123,7 @@ Response 200:
 {
   "page": 1,
   "pageSize": 20,
+  "total": 123,
   "items": [
     {
       "id": "uuid",
@@ -121,8 +136,43 @@ Response 200:
       "last_message_at": "ISO date|null",
       "participant_user_ids": ["uuid", "uuid"]
     }
+  ],
+  "metadata": { "count": 123, "page": 1, "size": 10 }
+}
+
+### GET /chats/v2/rooms
+Advanced room listing with filtering and joins. Only shows rooms where caller is an active participant, excludes single-user rooms, and excludes DMs where either participant has blocked the other. Includes optional DM requestor/creator names and avatars, plus meetup host details and avatar for meetup rooms.
+
+Query params:
+- page (integer, default 1)
+- pageSize (integer, default 10, max 100)
+
+Response 200:
+{
+  "data": [
+    {
+      "id": "uuid",
+      "type": "DM|meetup",
+      "meetup_id": "uuid|null",
+      "requestor_name": "string|null",
+      "dm_creator_name": "string|null",
+      "meetup_creator_name": "string|null",
+      "meetup_creator_avatar": "url|null",
+      "dm_requestor_avatar": "url|null",
+      "dm_creator_avatar": "url|null"
+    }
   ]
 }
+
+### GET /chats/v2/rooms/:id
+Get a single chat room’s details. Same fields as items in the list above.
+
+### POST /chats/rooms/:id/send
+- Headers: x-user-id
+- Body: { text: string }
+- Behavior: Validates membership in the room and inserts a text message, then pushes the same message to Firebase RTDB.
+- Response: 201 { id, chatId, senderUserId, kind: 'text', body, createdAt }
+Get a single chat room’s details. Same fields as items in the list above.
 - GET /requests
   - Headers: x-user-id
   - Query: filter (all|meetups|chats, default all), page (default 1)
