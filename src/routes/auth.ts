@@ -20,14 +20,14 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 // import { lookupIp, type IpInfoResponse } from "../utils/ip";
 import type { ConnInfo } from "hono/conninfo";
-// import {
-//   deleteDummyAccount,
-//   DUMMY_ACCOUNT_EMAILS,
-//   DUMMY_ACCOUNTS,
-//   linkToSecondaryDummyAccount,
-//   populateDummyProfile,
-//   SECONDARY_DUMMY_ACCOUNT,
-// } from "../utils/dummyAccount";
+import {
+  deleteDummyAccount,
+  DUMMY_ACCOUNT_EMAILS,
+  DUMMY_ACCOUNTS,
+  linkToSecondaryDummyAccount,
+  populateDummyProfile,
+  SECONDARY_DUMMY_ACCOUNT,
+} from "../utils/dummyAccount";
 import { env } from "../utils/env";
 
 const authRouter = new Hono();
@@ -129,14 +129,14 @@ async function handleOAuthCallback({
   let new_account = "false";
   let isDummyAccount = false;
   let isDummyProfileOnboardingComplete = false;
-  //   const isDummyAccountFlow = DUMMY_ACCOUNT_EMAILS.includes(user.email);
+  const isDummyAccountFlow = DUMMY_ACCOUNT_EMAILS.includes(user.email);
 
-  //   if (isDummyAccountFlow) {
-  //     await deleteDummyAccount("primary");
-  //     await populateDummyProfile(SECONDARY_DUMMY_ACCOUNT.email, "secondary");
+  if (isDummyAccountFlow) {
+    await deleteDummyAccount("primary");
+    await populateDummyProfile(SECONDARY_DUMMY_ACCOUNT.email, "secondary");
 
-  //     isDummyAccount = true;
-  //   }
+    isDummyAccount = true;
+  }
 
   let userInDb = await db.query.users.findFirst({
     where: eq(users.email, userEmail),
@@ -183,17 +183,17 @@ async function handleOAuthCallback({
 
   // linking of the primary and secondary dummy account needs
   // to be called after creating the new user
-  //   if (isDummyAccountFlow) {
-  //     const dummyAccountItem = DUMMY_ACCOUNTS.find(
-  //       (account) => account.email === user.email
-  //     );
+  if (isDummyAccountFlow) {
+    const dummyAccountItem = DUMMY_ACCOUNTS.find(
+      (account) => account.email === user.email
+    );
 
-  //     if (dummyAccountItem?.populateAccount) {
-  //       await populateDummyProfile(user.email, "primary");
-  //       await linkToSecondaryDummyAccount(user.email);
-  //       isDummyProfileOnboardingComplete = true;
-  //     }
-  //   }
+    if (dummyAccountItem?.populateAccount) {
+      await populateDummyProfile(user.email, "primary");
+      await linkToSecondaryDummyAccount(user.email);
+      isDummyProfileOnboardingComplete = true;
+    }
+  }
   //   let ipInfo: IpInfoResponse | null = null;
   let connInfo: ConnInfo | null = null;
 
@@ -244,12 +244,12 @@ async function handleOAuthCallback({
   url.searchParams.set("firebasetoken", firebasetoken);
   url.searchParams.set("new_account", String(new_account));
 
-  //   if (isDummyProfileOnboardingComplete) {
-  //     url.searchParams.set(
-  //       "is_onboarding_complete",
-  //       String(isDummyProfileOnboardingComplete)
-  //     );
-  //   }
+  if (isDummyProfileOnboardingComplete) {
+    url.searchParams.set(
+      "is_onboarding_complete",
+      String(isDummyProfileOnboardingComplete)
+    );
+  }
 
   return context.redirect(url.toString());
 }
