@@ -296,7 +296,7 @@ export class ChatsRepository {
         ORDER BY up.position ASC, up.created_at DESC
         LIMIT 1
       ) dmc_avatar ON TRUE
-      LEFT JOIN meetups m ON c.id = m.chat_room_id
+      LEFT JOIN meetups m ON c.meetup_id = m.id
       LEFT JOIN users meetup_creator ON m.host_id = meetup_creator.id
       LEFT JOIN LATERAL (
         SELECT up.optimized_url, up.original_url
@@ -408,7 +408,7 @@ export class ChatsRepository {
         ORDER BY up.position ASC
         LIMIT 1
       ) dmc_avatar ON TRUE
-      LEFT JOIN meetups m ON cr.id = m.chat_room_id
+      LEFT JOIN meetups m ON cr.meetup_id = m.id
       LEFT JOIN users meetup_creator ON m.host_id = meetup_creator.id
       LEFT JOIN LATERAL (
         SELECT up.optimized_url, up.original_url
