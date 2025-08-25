@@ -50,6 +50,14 @@ async function main() {
     console.warn('[seed:user_photos] Skipping user photos seeding:', (e as Error).message);
   }
 
+  // Backfill user_selfie rows for all users (idempotent)
+  try {
+    const { run: runUserSelfies } = await import('./userSelfies');
+    await runUserSelfies();
+  } catch (e) {
+    console.warn('[seed:user_selfie] Skipping user_selfie seeding:', (e as Error).message);
+  }
+
   // Airports from CSV (optional)
   try {
     const { seedAirportsFromCsv } = await import('./airports');
@@ -80,6 +88,14 @@ async function main() {
     await runBookmarks();
   } catch (e) {
     console.warn('[seed:bookmarks] Skipping bookmarks seeding:', (e as Error).message);
+  }
+
+  // Seed user_favorites_text (idempotent)
+  try {
+    const { seedUserFavoritesText } = await import('./userFavoritesText');
+    await seedUserFavoritesText();
+  } catch (e) {
+    console.warn('[seed:user_favorites_text] Skipping user_favorites_text seeding:', (e as Error).message);
   }
 
   console.log('Seed all completed');

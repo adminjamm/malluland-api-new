@@ -12,6 +12,10 @@ components:
       type: apiKey
       in: header
       name: x-user-id
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     PageParam:
       name: page
@@ -32,6 +36,304 @@ components:
               error:
                 type: string
 paths:
+  /admin/auth/login:
+    post:
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Login success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      token: { type: string }
+                      admin:
+                        type: object
+                        properties:
+                          id: { type: string, format: uuid }
+                          email: { type: string }
+                          firstName: { type: string, nullable: true }
+                          role: { type: string, nullable: true }
+  /admin/logs/create:
+    post:
+      summary: Create admin log entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, actionType]
+              properties:
+                userId: { type: string, format: uuid }
+                actionType: { type: string }
+                cmsPage: { type: string, nullable: true }
+      responses:
+        '200': { description: Created }
+  /admin/logs/list:
+    get:
+      summary: List admin logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, default: 50 }
+      responses:
+        '200':
+          description: List
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+                  metadata:
+                    type: object
+                    properties:
+                      page: { type: integer }
+                      size: { type: integer }
+                      count: { type: integer }
+  /admin/logs/{id}:
+    get:
+      summary: Get admin log by id
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Ok }
+        '404': { description: Not found }
+  /admin/members:
+    get:
+      summary: List members (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, minimum: 1, default: 10 }
+        - name: gender
+          in: query
+          schema: { type: string }
+        - name: q
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: List
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+                  metadata:
+                    type: object
+                    properties:
+                      page: { type: integer }
+                      size: { type: integer }
+                      count: { type: integer }
+  /admin/members/approve:
+    post:
+      summary: Approve members (set onboarding complete)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200': { description: Ok }
+  /admin/members/disapprove:
+    post:
+      summary: Disapprove members (set onboarding incomplete)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200': { description: Ok }
+  /admin/avatar-updates:
+    get:
+      summary: List pending avatar updates
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, minimum: 1, default: 10 }
+      responses:
+        '200': { description: Ok }
+  /admin/avatar-updates/approve:
+    post:
+      summary: Approve avatar photos
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200': { description: Ok }
+  /admin/avatar-updates/reject:
+    post:
+      summary: Reject avatar photos
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200': { description: Ok }
+  /admin/applications:
+    get:
+      summary: List pending applications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, minimum: 1, default: 10 }
+        - name: gender
+          in: query
+          schema: { type: string, enum: [all, male, female, other] }
+      responses:
+        '200':
+          description: List of applications with selfie and avatar info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { type: object }
+                  metadata:
+                    type: object
+                    properties:
+                      page: { type: integer }
+                      pageSize: { type: integer }
+                      total: { type: integer }
+                      totalPages: { type: integer }
+  /admin/applications/approveProfiles:
+    post:
+      summary: Approve profiles (set onboarding complete)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200': { description: Ok }
+  /admin/applications/disapproveProfiles:
+    post:
+      summary: Disapprove profiles (set onboarding incomplete)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200': { description: Ok }
+  /admin/applications/banUsers:
+    post:
+      summary: Ban users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200': { description: Ok }
+  /admin/applications/selfieRejects:
+    post:
+      summary: Reject user selfies by selfie id
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200': { description: Ok }
   /health:
     get:
       summary: Health check
@@ -605,24 +907,35 @@ paths:
                 text: { type: string, minLength: 1 }
       responses:
         '201':
-          description: Created chat message
+          description: Created chat message with participants
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  id: { type: string, format: uuid }
-                  chatId: { type: string, format: uuid }
-                  senderUserId: { type: string, format: uuid }
-                  kind: { type: string, enum: [text, system] }
-                  body: { type: string }
-                  createdAt: { type: string, format: date-time }
+                  message:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid }
+                      chatId: { type: string, format: uuid }
+                      senderUserId: { type: string, format: uuid }
+                      kind: { type: string, enum: [text, system] }
+                      body: { type: string }
+                      createdAt: { type: string, format: date-time }
+                  participants:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId: { type: string, format: uuid }
+                        name: { type: string, nullable: true }
+                        avatarUrl: { type: string, nullable: true }
         '400': { description: Bad request }
         '401': { description: Unauthorized }
   /chats/v2/rooms/{id}:
     get:
       summary: Get chat room details (v2)
-      description: Returns a single chat room row with optional joined fields (DM requestor/creator names and avatars, meetup host details and avatar).
+      description: Returns a single chat room row with optional joined fields (DM requestor/creator names and avatars, meetup host details and avatar). Includes active participant details.
       security:
         - XUserId: []
       parameters:
@@ -652,6 +965,14 @@ paths:
                   meetup_creator_avatar: { type: string, nullable: true }
                   dm_requestor_avatar: { type: string, nullable: true }
                   dm_creator_avatar: { type: string, nullable: true }
+                  participants:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId: { type: string, format: uuid }
+                        name: { type: string, nullable: true }
+                        avatarUrl: { type: string, nullable: true }
         '404': { description: Not found }
         '401': { description: Unauthorized }
   /requests/chats/{id}/accept:

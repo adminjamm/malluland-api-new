@@ -1,0 +1,27 @@
+meta {
+  name: Applications: Login
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/admin/auth/login
+  body: json
+  auth: inherit
+}
+
+params:query {
+  page: 1
+  size: 20
+}
+
+body:json {
+  {
+    "email": "amogh@example.com",
+    "password": "password"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

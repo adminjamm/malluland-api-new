@@ -1,0 +1,25 @@
+meta {
+  name: Applications: Disapprove Profiles
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/admin/applications/disapproveProfiles
+  auth: inherit
+  headers {
+    Authorization: Bearer {{adminToken}}
+    Content-Type: application/json
+  }
+  body: json {
+    ids: [
+      "00000000-0000-0000-0000-000000000003",
+      "00000000-0000-0000-0000-000000000004"
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+

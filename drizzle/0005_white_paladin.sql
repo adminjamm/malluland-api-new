@@ -1,0 +1,1 @@
+ALTER TABLE "user_photos" ADD COLUMN "status" text DEFAULT 'pending';

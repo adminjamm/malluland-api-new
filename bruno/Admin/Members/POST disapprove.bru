@@ -1,0 +1,15 @@
+meta {
+  name: POST disapprove
+  type: http
+  seq: 3
+}
+
+@token = {{adminToken}}
+
+post {{baseUrl}}/admin/members/disapprove
+content-type: application/json
+authorization: Bearer {{token}}
+
+{
+  "ids": ["{{userId}}"]
+}

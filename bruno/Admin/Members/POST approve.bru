@@ -1,0 +1,15 @@
+meta {
+  name: POST approve
+  type: http
+  seq: 2
+}
+
+@token = {{adminToken}}
+
+post {{baseUrl}}/admin/members/approve
+content-type: application/json
+authorization: Bearer {{token}}
+
+{
+  "ids": ["{{userId}}"]
+}

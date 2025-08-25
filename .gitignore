@@ -2,3 +2,5 @@ node_modules/*
 .env
 
 /dist
+# Ignore local admin creation helper script
+src/scripts/admins/addAdmin.ts

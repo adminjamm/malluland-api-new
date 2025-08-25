@@ -1,0 +1,24 @@
+meta {
+  name: Applications: List
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/admin/applications
+  body: none
+  auth: bearer
+}
+
+params:query {
+  page: 1
+  size: 20
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoiMGNjZDA2NDYtNmJlMS00OTM3LWE1NzItYTUyOTczY2IwOGQyIiwiZW1haWwiOiJhbW9naEBleGFtcGxlLmNvbSIsImlhdCI6MTc1NTc1OTc4NywiZXhwIjoxNzU2MzY0NTg3fQ.i_i5DUcMBlAKkrMRyat52u5dy92dwdkIUVj68C_7cRA
+}
+
+settings {
+  encodeUrl: true
+}

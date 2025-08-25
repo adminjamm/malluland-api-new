@@ -1,0 +1,10 @@
+meta {
+  name: GET by id
+  type: http
+  seq: 3
+}
+
+@token = {{adminToken}}
+
+get {{baseUrl}}/admin/logs/{{log_id}}
+authorization: Bearer {{token}}

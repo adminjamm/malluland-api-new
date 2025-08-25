@@ -1,0 +1,23 @@
+meta {
+  name: Avatar Updates: List
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/admin/avatar-updates
+  auth: inherit
+  headers {
+    Authorization: Bearer {{adminToken}}
+  }
+  body: none
+}
+
+params:query {
+  page: 1
+  pageSize: 10
+}
+
+settings {
+  encodeUrl: true
+}
